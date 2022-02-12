@@ -7,7 +7,7 @@ from flask import request
 from configurator import ConnectionConfig
 from continuous_verification.jorge import ContinuousVerification
 from typing import Dict
-from config.global_vars import CONFIG_PATH
+from result_api.config.global_vars import CONFIG_PATH
 
 app = Flask(__name__, template_folder="./")
 

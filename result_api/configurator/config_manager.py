@@ -1,6 +1,6 @@
 import json
 
-from config.global_vars import DEBUG
+from result_api.config.global_vars import DEBUG
 
 
 class ConnectionConfig:

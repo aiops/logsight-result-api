@@ -1,12 +1,11 @@
 import datetime
-import logging
 import math
 import os
 
 import numpy as np
 import pandas as pd
 
-from config import global_vars
+from result_api.config import global_vars
 from services.configurator.config_manager import ConnectionConfig
 from .es_query import ElasticsearchDataSource
 
