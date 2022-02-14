@@ -8,13 +8,14 @@ from configurator import ConnectionConfig
 from continuous_verification.jorge import ContinuousVerification
 from typing import Dict
 from result_api.config.global_vars import CONFIG_PATH
+from result_api.responses.responses import ErrorResponse
 
 app = Flask(__name__, template_folder="./")
 
 
-@app.route('/api/v1/results/verification', methods=['POST'])
+@app.route('/api/v1/results/verification', methods=['GET'])
 def get_tasks():
-    args = request.form
+    args = request.args
     application_id = args.get("applicationName")
     baseline_tag_id = args.get("baselineTag")
     compare_tag_id = args.get("compareTag")
@@ -24,12 +25,15 @@ def get_tasks():
                                         private_key=private_key,
                                         baseline_tag_id=baseline_tag_id,
                                         compare_tag_id=compare_tag_id)
-
-    return jsonify(result)
+    if result:
+        return jsonify(result)
+    else:
+        resp = {"message": "Data index does not exists, or empty. Try again later.", "status": 404}
+        return jsonify(resp)
 
 
 def parse_arguments() -> Dict:
-    parser = argparse.ArgumentParser(description='Logsight monolith.')
+    parser = argparse.ArgumentParser(description='Logsight monolith result API.')
     parser.add_argument('--cconf', help='Connection config to use (filename in logsight/config directory)',
                         type=str, default='connections', required=False)
     args = vars(parser.parse_args())
