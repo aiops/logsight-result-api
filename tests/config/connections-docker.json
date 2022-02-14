@@ -1,0 +1,14 @@
+{
+  "kafka": {
+    "host": "kafka",
+    "port": "9092",
+    "offset": "earliest",
+    "topic": "internal"
+  },
+  "elasticsearch": {
+    "host": "elasticsearch",
+    "port": 9200,
+    "username": "elastic",
+    "password": "elasticsearchpassword"
+  }
+}

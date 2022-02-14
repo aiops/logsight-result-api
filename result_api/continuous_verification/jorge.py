@@ -42,7 +42,7 @@ class ContinuousVerification:
     def extract_data(self, private_key, application_id, baseline_tag_id, compare_tag_id):
         df_baseline = self.extract_data_for_tag(private_key, application_id, baseline_tag_id)
         df_candidate = self.extract_data_for_tag(private_key, application_id, compare_tag_id)
-        if df_baseline and df_candidate:
+        if df_baseline is not None and df_candidate is not None:
             return df_baseline, df_candidate
         else:
             return None, None
@@ -76,7 +76,7 @@ def transform_etl(df_baseline, df_candidate):
     def get_semantic_level(df):
         return df.groupby('template')['predicted_level'].first().to_dict()
 
-    if df_baseline and df_candidate:
+    if df_baseline is not None and df_candidate is not None:
 
         df = pd.concat([df_baseline, df_candidate], axis=0)
         level = get_level(df)
@@ -106,7 +106,7 @@ def transform_etl(df_baseline, df_candidate):
                                     }, ignore_index=True)
         return df_csv
     else:
-        None
+        return None
 
 
 def transform_html(df):
@@ -136,16 +136,6 @@ def transform_html(df):
             else:
                 return 0
 
-        # baseline, candidate, level, semantics, description, risk as a percentage, id
-        #
-        # risk_tbl = [(0, 1, 0, "Added state", 0, "fa fa-plus-circle font-medium-1"),
-        #             (0, 1, 1, "Added state (Fault)", 100, "fa fa-exclamation-triangle font-medium-1"),
-        #             (1, 0, 0, "Deleted state", 75, "fa fa-minus-circle font-medium-1"),
-        #             (1, 0, 1, "Deleted state (F)", 0, "fa fa-minus-circle font-medium-1"),
-        #             (1, 1, 0, "Recurring state", 0, "fa fa-check-circle font-medium-1"),
-        #             (1, 1, 1, "Recurring state", 25, "fa fa-check-circle font-medium-1"),
-        #             ]
-        # baseline, candidate, semantics, description, risk as a percentage, id
         risk_tbl = [(0, 1, 0, 0, "Added state", 0, "fa fa-plus-circle font-medium-1"),
                     (0, 1, 1, 0, "Added state (E)", 80, "fa fa-exclamation-triangle font-medium-1"),
                     (0, 1, 0, 1, "Added state (F)", 80, "fa fa-exclamation-triangle font-medium-1"),
@@ -182,10 +172,16 @@ def transform_html(df):
 
         if value <= int((min_ + max_) / 2):
             r = 255
-            g = int(255 * value / int((min_ + max_) / 2))
+            try:
+                g = int(255 * value / int((min_ + max_) / 2))
+            except Exception as e:
+                g = 0
             b = 0
         else:
-            r = int(255 * (max_ - value) / int((min_ + max_) / 2))
+            try:
+                r = int(255 * (max_ - value) / int((min_ + max_) / 2))
+            except Exception as e:
+                r = 0
             g = 255
             b = 0
 
@@ -225,7 +221,10 @@ def transform_html(df):
             return f'rgba(0, 0, 0, {alpha})'
 
     def get_percentage(a, b):
-        return int(100 * (a / (a + b)))
+        try:
+            return int(100 * (a / (a + b)))
+        except Exception as e:
+            return 0
 
     def get_percentage_color(a, b, color='blue'):
         N = 10
@@ -258,8 +257,17 @@ def transform_html(df):
             return [f'rgb(34,43,69)', f'rgba(255, 0, 0, {alpha})']
         elif semantics == 'Report' and (level == 'INFO' or level == 'DEBUG' or level == 'FINE' or level == 'REPORT'):
             return [f'rgb(34,43,69)', f'rgb(34,43,69)']
+    def coverage(x):
+        try:
+            return [np.round(100 * ((x + y) / z), 1) for x, y, z in
+         x[['count_baseline', 'count_candidate', 'count_gtotal']].itertuples(
+             index=False)]
+        except Exception as e:
+            return [np.round(100 * 0, 1) for x, y, z in
+         x[['count_baseline', 'count_candidate', 'count_gtotal']].itertuples(
+             index=False)]
 
-    if df:
+    if df is not None:
         formatted_df = df.assign(dates=lambda x: [format_dates(s, e) for s, e in
                                                   x[['start_date', 'end_date']].itertuples(index=False)],
                                  count_total=lambda x: [b + c for b, c in
@@ -284,9 +292,7 @@ def transform_html(df):
                                  change_perc=lambda x: [get_change_perc(a, b)
                                                         for a, b in
                                                         x[['count_baseline', 'count_candidate']].itertuples(index=False)],
-                                 coverage=lambda x: [np.round(100 * ((x + y) / z), 1) for x, y, z in
-                                                     x[['count_baseline', 'count_candidate', 'count_gtotal']].itertuples(
-                                                         index=False)],
+                                 coverage=lambda x: coverage(x),
                                  risk_score=lambda x: [get_risk(b, c, p, l, s)[1] for b, c, p, l, s in
                                                        x[['count_baseline', 'count_candidate', 'change_perc', 'level',
                                                           'semantics']].itertuples(index=False)],
@@ -314,7 +320,7 @@ def prepare_html(df):
     def trend_symbol(v):
         return '+' if v >= 0 else '-'
 
-    if df:
+    if df is not None:
         percentage = int(len(df)*0.3)
         top_k = df.head(percentage)
         if len(top_k['risk_score']) > 0:
@@ -325,8 +331,14 @@ def prepare_html(df):
         count_baseline = df['count_baseline'].sum()
         count_candidate = df['count_candidate'].sum()
         total_n_log_messages = count_baseline + count_candidate
-        baseline_perc = int(round(100 * count_baseline / (count_baseline + count_candidate), 0))
-        candidate_perc = int(round(100 * count_candidate / (count_baseline + count_candidate), 0))
+        try:
+            baseline_perc = int(round(100 * count_baseline / (count_baseline + count_candidate), 0))
+        except Exception as e:
+            baseline_perc = 0
+        try:
+            candidate_perc = int(round(100 * count_candidate / (count_baseline + count_candidate), 0))
+        except Exception as e:
+            candidate_perc = 0
 
         baseline_perc, candidate_perc = baseline_perc - candidate_perc, candidate_perc - baseline_perc
         baseline_perc = trend_symbol(baseline_perc) + str(baseline_perc)
