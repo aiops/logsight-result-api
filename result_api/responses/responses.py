@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class Response(BaseModel):
-    id: str
+    app_id: str
     message: str
     status: HTTPStatus
 
