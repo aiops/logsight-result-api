@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 
 from flask import Flask, jsonify
@@ -7,24 +8,22 @@ from flask import request
 from configurator import ConnectionConfig
 from continuous_verification.jorge import ContinuousVerification
 from typing import Dict
+from config.global_vars import CONFIG_PATH
+from dto.VerificationDTO import VerificationDTO
 from result_api.config.global_vars import CONFIG_PATH
 from result_api.responses.responses import ErrorResponse
 
 app = Flask(__name__, template_folder="./")
 
 
-@app.route('/api/v1/results/verification', methods=['GET'])
+@app.route('/api/v1/verification', methods=['POST'])
 def get_tasks():
-    args = request.args
-    application_id = args.get("applicationName")
-    baseline_tag_id = args.get("baselineTag")
-    compare_tag_id = args.get("compareTag")
-    private_key = args.get("privateKey")
-
-    result = cv_module.run_verification(application_id=application_id,
-                                        private_key=private_key,
-                                        baseline_tag_id=baseline_tag_id,
-                                        compare_tag_id=compare_tag_id)
+    args = request.data
+    verificationDTO = VerificationDTO(**json.loads(request.data))
+    result = cv_module.run_verification(application_id=verificationDTO.applicationName,
+                                        private_key=verificationDTO.privateKey,
+                                        baseline_tag_id=verificationDTO.baselineTag,
+                                        compare_tag_id=verificationDTO.compareTag)
     if result:
         return jsonify(result)
     else:
