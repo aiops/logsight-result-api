@@ -1,6 +1,5 @@
 import logging
 import os
-import time
 import unittest
 
 from result_api.config import global_vars
@@ -78,10 +77,13 @@ class TestVerification(unittest.TestCase):
     def test_verification_invalid_all_params(self):
         params = [["", "", "", ""], [self.key, self.app_name, self.compareTag, ""],
                   [self.key, self.app_name, "", self.baselineTag],
-                  [self.app_name, self.key, self.compareTag, self.baselineTag]]
+                  [self.app_name, self.key, self.compareTag, self.baselineTag],
+                  [self.app_name, self.key, self.compareTag]]
         for param in params:
-            assert self.cv_module.run_verification(param[0], param[1], param[2], param[3]) is None
-
+            if len(params) == 4:
+                assert self.cv_module.run_verification(param[0], param[1], param[2], param[3]) is None
+            else:
+                assert self.cv_module.run_verification(param[0], param[1], param[2]) is None
 
 if __name__ == "__main__":
     unittest.main()

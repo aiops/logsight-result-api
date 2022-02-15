@@ -47,7 +47,7 @@ class ContinuousVerification:
         else:
             return None, None
 
-    def run_verification(self, private_key, application_id, baseline_tag_id, compare_tag_id):
+    def run_verification(self, private_key="", application_id="", baseline_tag_id="", compare_tag_id=""):
         df_baseline, df_candidate = self.extract_data(private_key, application_id, baseline_tag_id, compare_tag_id)
         df_etl = transform_etl(df_baseline, df_candidate)
         df_html = transform_html(df_etl)
