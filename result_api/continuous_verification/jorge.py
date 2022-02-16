@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from result_api.config import global_vars
-from services.configurator.config_manager import ConnectionConfig
+from result_api.configurator.config_manager import ConnectionConfig
 from .es_query import ElasticsearchDataSource
 
 

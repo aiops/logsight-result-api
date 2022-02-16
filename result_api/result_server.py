@@ -9,7 +9,6 @@ from flask import request
 from configurator import ConnectionConfig
 from continuous_verification.jorge import ContinuousVerification
 from typing import Dict
-from config.global_vars import CONFIG_PATH
 from dto.VerificationDTO import VerificationDTO
 from result_api.config.global_vars import CONFIG_PATH
 from result_api.responses.responses import ErrorResponse, SuccessResponse
@@ -17,20 +16,18 @@ from result_api.responses.responses import ErrorResponse, SuccessResponse
 app = Flask(__name__, template_folder="./")
 
 
-@app.route('/api/v1/verification', methods=['POST'])
+@app.route('/api/v1/verification', methods=['GET'])
 def get_tasks():
-    args = request.data
-    verificationDTO = VerificationDTO(**json.loads(request.data))
-    # TODO sent application_id and application_name
+    verificationDTO = VerificationDTO(**request.args)
     result = cv_module.run_verification(application_id=verificationDTO.applicationName,
                                         private_key=verificationDTO.privateKey,
                                         baseline_tag_id=verificationDTO.baselineTag,
                                         compare_tag_id=verificationDTO.compareTag)
     if result:
-        return jsonify(SuccessResponse(verificationDTO.applicationId, json.dumps(result)))
+        return SuccessResponse(verificationDTO.applicationId, json.dumps(result)).json()
     else:
         resp = ErrorResponse(verificationDTO.applicationId, "Data index does not exists, or empty. Try again later.", HTTPStatus.NOT_FOUND)
-        return jsonify(resp)
+        return resp.json()
 
 
 def parse_arguments() -> Dict:
@@ -61,4 +58,4 @@ if __name__ == '__main__':
     connection_conf_file = verify_file_ext(args['cconf'], ".json")
     cv_module = ContinuousVerification(connection_conf_file)
 
-    serve(app, host='0.0.0.0', port=5554)
+    serve(app, host='0.0.0.0', port=5557)
