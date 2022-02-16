@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 import os
 from http import HTTPStatus
 
@@ -17,11 +18,11 @@ from result_api.responses.responses import ErrorResponse, SuccessResponse
 app = Flask(__name__, template_folder="./")
 
 
-@app.route('/api/v1/verification', methods=['POST'])
+@app.route('/api/v1/verification', methods=['GET'])
 def get_tasks():
-    args = request.data
-    verificationDTO = VerificationDTO(**json.loads(request.data))
-    # TODO sent application_id and application_name
+    args = request.args.to_dict()
+    verificationDTO = VerificationDTO(**args)
+    logging.info("Getting verification results.")
     result = cv_module.run_verification(application_id=verificationDTO.applicationName,
                                         private_key=verificationDTO.privateKey,
                                         baseline_tag_id=verificationDTO.baselineTag,

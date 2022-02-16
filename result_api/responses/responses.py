@@ -11,9 +11,9 @@ class Response(BaseModel):
 
 class ErrorResponse(Response):
     def __init__(self, id, message, status = HTTPStatus.INTERNAL_SERVER_ERROR):
-        super(ErrorResponse, self).__init__(id=id, message=message, status=status)
+        super(ErrorResponse, self).__init__(app_id=id, message=message, status=status)
 
 
 class SuccessResponse(Response):
     def __init__(self, id, message):
-        super(SuccessResponse, self).__init__(id=id, message=message, status=HTTPStatus.OK)
+        super(SuccessResponse, self).__init__(app_id=id, message=message, status=HTTPStatus.OK)
