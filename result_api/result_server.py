@@ -18,20 +18,29 @@ from result_api.responses.responses import ErrorResponse, SuccessResponse
 app = Flask(__name__, template_folder="./")
 
 
-@app.route('/api/v1/verification', methods=['GET'])
+@app.route('/api/v1/compare', methods=['GET'])
 def get_tasks():
-    args = request.args.to_dict()
-    verificationDTO = VerificationDTO(**args)
-    logging.info("Getting verification results.")
+    try:
+        verificationDTO = VerificationDTO(**request.args)
+    except Exception as e:
+        logging.info(e)
+        resp = ErrorResponse(verificationDTO.applicationId, "Invalid parameters.",
+                             HTTPStatus.BAD_REQUEST)
+        return resp.json()
     result = cv_module.run_verification(application_id=verificationDTO.applicationName,
                                         private_key=verificationDTO.privateKey,
                                         baseline_tag_id=verificationDTO.baselineTag,
                                         compare_tag_id=verificationDTO.compareTag)
-    if result:
-        return jsonify(SuccessResponse(verificationDTO.applicationId, json.dumps(result)))
-    else:
-        resp = ErrorResponse(verificationDTO.applicationId, "Data index does not exists, or empty. Try again later.", HTTPStatus.NOT_FOUND)
-        return jsonify(resp)
+    try:
+        if result:
+            return jsonify(result)
+        else:
+            resp = ErrorResponse(verificationDTO.applicationId, "Data index does not exists, or empty. Try again later.", HTTPStatus.NOT_FOUND)
+            return resp.json()
+    except Exception as e:
+        resp = ErrorResponse(verificationDTO.applicationId, "Internal server error",
+                             HTTPStatus.INTERNAL_SERVER_ERROR)
+        return resp.json()
 
 
 def parse_arguments() -> Dict:

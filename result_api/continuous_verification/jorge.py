@@ -7,13 +7,14 @@ import numpy as np
 import pandas as pd
 
 from result_api.config import global_vars
-from services.configurator.config_manager import ConnectionConfig
+from result_api.configurator.config_manager import ConnectionConfig
 from .es_query import ElasticsearchDataSource
 
 
 class ContinuousVerification:
     def __init__(self, connections_conf_file):
-        self.es = ElasticsearchDataSource(**ConnectionConfig(os.path.join(global_vars.CONFIG_PATH, connections_conf_file)).get_elasticsearch_params())
+        self.es = ElasticsearchDataSource(
+            **ConnectionConfig(os.path.join(global_vars.CONFIG_PATH, connections_conf_file)).get_elasticsearch_params())
 
     def extract_data_for_tag(self, private_key, application_id, tag):
         # quality = self.es.get_log_ad_data(private_key=private_key, app=application_id, tag=tag)
@@ -37,7 +38,6 @@ class ContinuousVerification:
         dft.index = dft['timestamp']
         # dft.set_index('timestamp', inplace=True)
         return dft[['level', 'template', 'tag', 'predicted_level']]
-
 
     def extract_data(self, private_key, application_id, baseline_tag_id, compare_tag_id):
         df_baseline = self.extract_data_for_tag(private_key, application_id, baseline_tag_id)
@@ -249,36 +249,42 @@ def transform_html(df):
     def get_semantic_color(level, semantics):
         level = str(level).upper()
         alpha = .7
-        if semantics == "Fault" and (level == 'ERROR' or level == 'WARNING' or level == 'CRITICAL' or level == 'WARN' or level == 'ERR'):
+        if semantics == "Fault" and (
+                level == 'ERROR' or level == 'WARNING' or level == 'CRITICAL' or level == 'WARN' or level == 'ERR'):
             return [f'rgba(255, 0, 0, {alpha})', f'rgba(255, 0, 0, {alpha})']
         elif semantics == 'Fault' and (level == 'INFO' or level == 'DEBUG' or level == 'FINE' or level == 'REPORT'):
             return [f'rgba(255, 0, 0, {alpha})', f'rgb(34,43,69)']
-        elif semantics == 'Report' and (level == 'ERROR' or level == 'WARNING' or level == 'CRITICAL' or level == 'WARN' or level == 'ERR'):
+        elif semantics == 'Report' and (
+                level == 'ERROR' or level == 'WARNING' or level == 'CRITICAL' or level == 'WARN' or level == 'ERR'):
             return [f'rgb(34,43,69)', f'rgba(255, 0, 0, {alpha})']
         elif semantics == 'Report' and (level == 'INFO' or level == 'DEBUG' or level == 'FINE' or level == 'REPORT'):
             return [f'rgb(34,43,69)', f'rgb(34,43,69)']
+
     def coverage(x):
         try:
             return [np.round(100 * ((x + y) / z), 1) for x, y, z in
-         x[['count_baseline', 'count_candidate', 'count_gtotal']].itertuples(
-             index=False)]
+                    x[['count_baseline', 'count_candidate', 'count_gtotal']].itertuples(
+                        index=False)]
         except Exception as e:
             return [np.round(100 * 0, 1) for x, y, z in
-         x[['count_baseline', 'count_candidate', 'count_gtotal']].itertuples(
-             index=False)]
+                    x[['count_baseline', 'count_candidate', 'count_gtotal']].itertuples(
+                        index=False)]
 
     if df is not None:
         formatted_df = df.assign(dates=lambda x: [format_dates(s, e) for s, e in
                                                   x[['start_date', 'end_date']].itertuples(index=False)],
                                  count_total=lambda x: [b + c for b, c in
-                                                        x[['count_baseline', 'count_candidate']].itertuples(index=False)],
+                                                        x[['count_baseline', 'count_candidate']].itertuples(
+                                                            index=False)],
                                  count_gtotal=lambda x: x['count_baseline'].sum() + x['count_candidate'].sum(),
                                  perc_baseline=lambda x: [get_percentage(b, c)
                                                           for b, c in
-                                                          x[['count_baseline', 'count_candidate']].itertuples(index=False)],
+                                                          x[['count_baseline', 'count_candidate']].itertuples(
+                                                              index=False)],
                                  perc_candidate=lambda x: [get_percentage(c, b)
-                                                           for b, c in x[['count_baseline', 'count_candidate']].itertuples(
-                                         index=False)],
+                                                           for b, c in
+                                                           x[['count_baseline', 'count_candidate']].itertuples(
+                                                               index=False)],
                                  b_color=lambda x: [get_percentage_color(b, t, color='silver')
                                                     for b, t in
                                                     x[['count_baseline', 'count_total']].itertuples(index=False)],
@@ -287,17 +293,20 @@ def transform_html(df):
                                                     x[['count_candidate', 'count_total']].itertuples(index=False)],
                                  change_count=lambda x: [get_change_count(b, c, lambda s: f'{s[0:0]}')
                                                          for b, c in
-                                                         x[['count_baseline', 'count_candidate']].itertuples(index=False)],
+                                                         x[['count_baseline', 'count_candidate']].itertuples(
+                                                             index=False)],
                                  change_color=lambda x: x['change_count'].map(lambda y: get_change_color(y)),
                                  change_perc=lambda x: [get_change_perc(a, b)
                                                         for a, b in
-                                                        x[['count_baseline', 'count_candidate']].itertuples(index=False)],
+                                                        x[['count_baseline', 'count_candidate']].itertuples(
+                                                            index=False)],
                                  coverage=lambda x: coverage(x),
                                  risk_score=lambda x: [get_risk(b, c, p, l, s)[1] for b, c, p, l, s in
                                                        x[['count_baseline', 'count_candidate', 'change_perc', 'level',
                                                           'semantics']].itertuples(index=False)],
                                  risk_description=lambda x: [get_risk(b, c, p, l, s)[0] for b, c, p, l, s in
-                                                             x[['count_baseline', 'count_candidate', 'change_perc', 'level',
+                                                             x[['count_baseline', 'count_candidate', 'change_perc',
+                                                                'level',
                                                                 'semantics']].itertuples(index=False)],
                                  risk_symbol=lambda x: [get_risk(b, c, p, l, s)[2] for b, c, p, l, s in
                                                         x[['count_baseline', 'count_candidate', 'change_perc', 'level',
@@ -321,7 +330,7 @@ def prepare_html(df):
         return '+' if v >= 0 else '-'
 
     if df is not None:
-        percentage = int(len(df)*0.3)
+        percentage = int(len(df) * 0.3)
         top_k = df.head(percentage)
         if len(top_k['risk_score']) > 0:
             risk = int(top_k['risk_score'].sum() / len(top_k['risk_score']))
@@ -358,44 +367,54 @@ def prepare_html(df):
 
         deleted_states = len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0)])
         if deleted_states:
-            deleted_states_info = math.floor(100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0) & (
-                   df['level'] == 'INFO')]) / deleted_states)
-            deleted_states_fault = math.ceil(100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0) & (
-                    df['level'] != 'INFO')]) / deleted_states)
+            deleted_states_info = math.floor(
+                100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0) & (
+                        df['level'] == 'INFO')]) / deleted_states)
+            deleted_states_fault = math.ceil(
+                100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0) & (
+                        df['level'] != 'INFO')]) / deleted_states)
         else:
             deleted_states_info = 0
             deleted_states_fault = 0
 
         recurring_states_df = df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] > 0)].copy()
         recurring_states = len(recurring_states_df)
-
         if recurring_states:
-            recurring_states_info = math.floor(100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] > 0) & (
-                    df['level'] == 'INFO')]) / recurring_states)
-            recurring_states_fault = math.ceil(100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] > 0) & (
-                    df['level'] != 'INFO')]) / recurring_states)
+            recurring_states_info = math.floor(
+                100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] > 0) & (
+                        df['level'] == 'INFO')]) / recurring_states)
+            recurring_states_fault = math.ceil(
+                100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] > 0) & (
+                        df['level'] != 'INFO')]) / recurring_states)
         else:
             recurring_states_info = 0
             recurring_states_fault = 0
-        frequency_change_threshold = .5
+        frequency_change_threshold = .25
         frequency_change = len(
             recurring_states_df.loc[(recurring_states_df['change_perc'].abs() >= frequency_change_threshold)])
         if frequency_change:
             frequency_change_info = \
-                (math.floor(100 * len(recurring_states_df.loc[
-                                   (recurring_states_df['change_perc'] < -frequency_change_threshold) & (
-                                           df['level'] == 'INFO')]) / frequency_change),
-                 math.ceil(100 * len(recurring_states_df.loc[
-                                   (recurring_states_df['change_perc'] >= frequency_change_threshold) & (
-                                           df['level'] == 'INFO')])) / frequency_change)
-        else:
-            frequency_change_info = 0
+                {"increase": math.floor(100 * len(recurring_states_df.loc[
+                                                      (recurring_states_df[
+                                                           'change_perc'] < -frequency_change_threshold) & (
+                                                              df['level'] == 'INFO')]) / frequency_change),
+                 "decrease": math.ceil(100 * len(recurring_states_df.loc[
+                                                     (recurring_states_df[
+                                                          'change_perc'] >= frequency_change_threshold) & (
+                                                             df['level'] == 'INFO')]) / frequency_change)}
 
-        frequency_change_fault = \
-            (len(recurring_states_df.loc[
-                     (recurring_states_df['change_perc'] < -frequency_change_threshold) & (df['level'] != 'INFO')]),
-             len(recurring_states_df.loc[
-                     (recurring_states_df['change_perc'] >= frequency_change_threshold) & (df['level'] != 'INFO')]))
+            frequency_change_fault = \
+                {"increase": math.floor(100 * len(recurring_states_df.loc[
+                                                      (recurring_states_df[
+                                                           'change_perc'] < -frequency_change_threshold) & (
+                                                                  df['level'] != 'INFO')]) / frequency_change),
+                 "decrease": math.ceil(100 * len(recurring_states_df.loc[
+                                                     (recurring_states_df[
+                                                          'change_perc'] >= frequency_change_threshold) & (
+                                                                 df['level'] != 'INFO')]) / frequency_change)}
+        else:
+            frequency_change_info = {"increase": 0.0, "decrease": 0.0}
+            frequency_change_fault = {"increase": 0.0, "decrease": 0.0}
 
         log_level_x_axis = [f'{i}.05' for i in range(1, 31, 3)]
         log_level_timeseries = [
@@ -420,28 +439,29 @@ def prepare_html(df):
 
         return dict(
             risk_color=risk_color,
-            risk=risk,
-            total_n_log_messages=int(total_n_log_messages),
-            count_baseline=int(count_baseline),
-            candidate_perc=candidate_perc,
-            added_states=added_states,
-            added_states_info=added_states_info,
-            added_states_fault=added_states_fault,
-            deleted_states=deleted_states,
-            deleted_states_info=deleted_states_info,
-            deleted_states_fault=deleted_states_fault,
-            recurring_states=recurring_states,
-            recurring_states_info=recurring_states_info,
-            recurring_states_fault=recurring_states_fault,
+            risk=risk,  #
+            total_n_log_messages=int(total_n_log_messages),  #
+            count_baseline=int(count_baseline),  #
+            count_candidate=int(count_candidate), #
+            candidate_perc=candidate_perc,  #
+            added_states=added_states,  #
+            added_states_info=added_states_info,  #
+            added_states_fault=added_states_fault,  #
+            deleted_states=deleted_states,  #
+            deleted_states_info=deleted_states_info,  #
+            deleted_states_fault=deleted_states_fault,  #
+            recurring_states=recurring_states,  #
+            recurring_states_info=recurring_states_info,  #
+            recurring_states_fault=recurring_states_fault,  #
             frequency_change_threshold=int(frequency_change_threshold * 100),
-            frequency_change=frequency_change,
-            frequency_change_info=frequency_change_info,
-            frequency_change_fault=frequency_change_fault,
+            frequency_change=frequency_change,  #
+            frequency_change_info=frequency_change_info,  #
+            frequency_change_fault=frequency_change_fault,  #
             log_level_x_axis=log_level_x_axis,
             log_level_timeseries=log_level_timeseries,
             frequency_labels=frequency_labels,
-            frequency_baseline=frequency_baseline,
-            frequency_candidate=frequency_candidate,
+            frequency_baseline=frequency_baseline,  #
+            frequency_candidate=frequency_candidate,  #
             cols=template_tbl_cols,
             rows=template_tbl_rows)
     else:
