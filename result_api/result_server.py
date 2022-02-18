@@ -1,5 +1,4 @@
 import argparse
-import json
 import logging
 import os
 from http import HTTPStatus
@@ -10,10 +9,9 @@ from flask import request
 from configurator import ConnectionConfig
 from continuous_verification.jorge import ContinuousVerification
 from typing import Dict
+from dto.verification_dto import VerificationDTO
 from config.global_vars import CONFIG_PATH
-from dto.VerificationDTO import VerificationDTO
-from result_api.config.global_vars import CONFIG_PATH
-from result_api.responses.responses import ErrorResponse, SuccessResponse
+from responses.responses import ErrorResponse
 
 app = Flask(__name__, template_folder="./")
 
