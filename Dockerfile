@@ -1,4 +1,4 @@
-# docker build -t logsightaiowner/logsight .
+# docker build -t logsight/logsight-result-api .
 
 # set base image (host OS)
 FROM python:3.7
@@ -16,5 +16,5 @@ RUN pip install -r requirements.txt
 # copy code
 COPY result_api/ result_api
 
-ENTRYPOINT [ "python3", "-u", "./result_api/result_server.py", "--cconf", "connections-docker" ]
+ENTRYPOINT [ "python3", "-u", "./result_api/result_server.py" ]
 #ENTRYPOINT [ "bash" ]
