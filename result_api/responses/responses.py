@@ -1,16 +1,16 @@
-import datetime
 from http import HTTPStatus
+
 from pydantic import BaseModel
 
 
 class Response(BaseModel):
     app_id: str
-    message:str
+    message: str
     status: HTTPStatus
 
 
 class ErrorResponse(Response):
-    def __init__(self, id, message, status = HTTPStatus.INTERNAL_SERVER_ERROR):
+    def __init__(self, id, message, status=HTTPStatus.INTERNAL_SERVER_ERROR):
         super(ErrorResponse, self).__init__(app_id=id, message=message, status=status)
 
 
