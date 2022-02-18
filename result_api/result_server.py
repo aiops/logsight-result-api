@@ -24,7 +24,7 @@ def get_tasks():
         verificationDTO = VerificationDTO(**request.args)
     except Exception as e:
         logging.info(e)
-        resp = ErrorResponse(verificationDTO.applicationId, "Invalid parameters.",
+        resp = ErrorResponse(request.args.get("applicationId", ""), "Invalid parameters.",
                              HTTPStatus.BAD_REQUEST)
         return resp.json()
     result = cv_module.run_verification(application_id=verificationDTO.applicationName,
