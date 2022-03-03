@@ -80,6 +80,8 @@ def transform_etl(df_baseline, df_candidate):
 
         df = pd.concat([df_baseline, df_candidate], axis=0)
         level = get_level(df)
+        if 'level' in level.keys():
+            level = level['level']
         semantic_level = get_semantic_level(df)
 
         trend_baseline = get_template_trend(df_baseline)
@@ -94,6 +96,11 @@ def transform_etl(df_baseline, df_candidate):
                                        'level', 'semantics'])
 
         for template in set(get_template_ids(df_baseline)).union(set(list(get_template_ids(df_candidate)))):
+            print("*************************")
+            print(template)
+            print( level)
+            print(level.get(str(template), None))
+            print("*************************")
             df_csv = df_csv.append({'start_date': start_date.get(template, None),
                                     'end_date': end_date.get(template, None),
                                     'template': template,
@@ -320,6 +327,7 @@ def transform_html(df):
                                                            x[['level', 'semantics']].itertuples(index=False)]) \
             .fillna('')
 
+        print(formatted_df.sort_values(by=['risk_score', 'coverage'], ascending=False).to_dict())
         return formatted_df.sort_values(by=['risk_score', 'coverage'], ascending=False)
     else:
         return None
