@@ -15,6 +15,10 @@ RUN pip install -r requirements.txt
 
 # copy code
 COPY result_api/ result_api
+# copy entrypoint.sh
+COPY entrypoint.sh .
 
-ENTRYPOINT [ "python3", "-u", "./result_api/result_server.py" ]
-#ENTRYPOINT [ "bash" ]
+# Set logsight home dir
+ENV LOGSIGHT_HOME="/code/result_api"
+
+ENTRYPOINT [ "./entrypoint.sh" ]
