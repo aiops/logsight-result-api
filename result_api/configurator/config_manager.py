@@ -1,5 +1,3 @@
-import json
-
 from config import Config
 
 from configs.global_vars import DEBUG

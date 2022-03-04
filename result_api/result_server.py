@@ -66,7 +66,7 @@ if __name__ == '__main__':
     args = parse_arguments()
     config = get_config(args)
 
-    connection_conf_file = verify_file_ext(args['cconf'], ".json")
+    connection_conf_file = verify_file_ext(args['cconf'], ".cfg")
     cv_module = ContinuousVerification(connection_conf_file)
 
     serve(app, host='0.0.0.0', port=5554)
