@@ -1,11 +1,13 @@
 import json
 
-from config.global_vars import DEBUG
+from config import Config
+
+from configs.global_vars import DEBUG
 
 
 class ConnectionConfig:
     def __init__(self, connection_config_path: str):
-        self.conns = json.load(open(connection_config_path, 'r'))
+        self.conns = Config(connection_config_path).as_dict()
 
         for conn in self.conns:
             for key in self.conns[conn].keys():

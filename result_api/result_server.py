@@ -10,7 +10,7 @@ from configurator import ConnectionConfig
 from continuous_verification.jorge import ContinuousVerification
 from typing import Dict
 from dto.verification_dto import VerificationDTO
-from config.global_vars import CONFIG_PATH
+from configs.global_vars import CONFIG_PATH
 from responses.responses import ErrorResponse
 
 app = Flask(__name__, template_folder="./")
@@ -43,14 +43,14 @@ def get_tasks():
 
 def parse_arguments() -> Dict:
     parser = argparse.ArgumentParser(description='Logsight monolith result API.')
-    parser.add_argument('--cconf', help='Connection config to use (filename in logsight/config directory)',
+    parser.add_argument('--cconf', help='Connection configs to use (filename in logsight/configs directory)',
                         type=str, default='connections', required=False)
     args = vars(parser.parse_args())
     return args
 
 
 def get_config(args: Dict) -> ConnectionConfig:
-    connection_conf_file = verify_file_ext(args['cconf'], ".json")
+    connection_conf_file = verify_file_ext(args['cconf'], ".cfg")
     connection_conf_path = os.path.join(CONFIG_PATH, connection_conf_file)
     return ConnectionConfig(connection_conf_path)
 
