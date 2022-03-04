@@ -15,6 +15,6 @@ RUN pip install -r requirements.txt
 
 # copy code
 COPY result_api/ result_api
-
+COPY logsight-eula.txt /
 ENTRYPOINT [ "python3", "-u", "./result_api/result_server.py" ]
 #ENTRYPOINT [ "bash" ]
