@@ -2,7 +2,7 @@ import logging
 import os
 import unittest
 
-from result_api.config import global_vars
+from result_api.configs import global_vars
 from result_api.configurator import ConnectionConfig
 from result_api.continuous_verification.es_query import ElasticsearchDataSource
 from result_api.continuous_verification.jorge import ContinuousVerification
@@ -18,7 +18,7 @@ def verify_file_ext(filename: str, ext: str):
 class TestVerification(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
-        connection_conf_file = verify_file_ext("connections.json", ".json")
+        connection_conf_file = verify_file_ext("connections.cfg", ".cfg")
         self.cv_module = ContinuousVerification(connection_conf_file)
         es_client = ElasticsearchDataSource(
             **ConnectionConfig(os.path.join(global_vars.CONFIG_PATH, connection_conf_file)).get_elasticsearch_params())

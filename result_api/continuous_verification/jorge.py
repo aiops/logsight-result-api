@@ -6,7 +6,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from config import global_vars
+from configs import global_vars
 from configurator.config_manager import ConnectionConfig
 from .es_query import ElasticsearchDataSource
 
