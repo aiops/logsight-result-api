@@ -6,7 +6,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from config import global_vars
+from configs import global_vars
 from configurator.config_manager import ConnectionConfig
 from .es_query import ElasticsearchDataSource
 
@@ -80,6 +80,8 @@ def transform_etl(df_baseline, df_candidate):
 
         df = pd.concat([df_baseline, df_candidate], axis=0)
         level = get_level(df)
+        if 'level' in level.keys():
+            level = level['level']
         semantic_level = get_semantic_level(df)
 
         trend_baseline = get_template_trend(df_baseline)
