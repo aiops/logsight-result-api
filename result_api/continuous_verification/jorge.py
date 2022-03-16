@@ -273,8 +273,7 @@ def transform_html(df):
                         index=False)]
 
     if df is not None:
-        formatted_df = df.assign(dates=lambda x: [format_dates(s, e) for s, e in
-                                                  x[['start_date', 'end_date']].itertuples(index=False)],
+        formatted_df = df.assign(
                                  count_total=lambda x: [b + c for b, c in
                                                         x[['count_baseline', 'count_candidate']].itertuples(
                                                             index=False)],
