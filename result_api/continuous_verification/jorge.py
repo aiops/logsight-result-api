@@ -434,7 +434,7 @@ def prepare_html(df):
         frequency_baseline = list(sdf.count_baseline)[:frequency_topk]
         frequency_candidate = list(sdf.count_candidate)[:frequency_topk]
 
-        template_tbl_cols = ['Risk', 'Description', 'Baseline', 'Candidate', 'Template', 'Code',
+        template_tbl_cols = ['Risk', 'Description', 'Baseline', 'Candidate', 'State', 'Code',
                              'Count', 'Change', 'Coverage', 'Level', 'Semantics']
         template_tbl_rows = df.to_dict(orient='records')
 
