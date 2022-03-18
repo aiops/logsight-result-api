@@ -361,7 +361,7 @@ def prepare_html(df):
                         df['level'] == 'INFO')]) / added_states)
             added_states_fault = math.ceil(100 * len(
                 df.loc[(df['count_baseline'] == 0) & (df['count_candidate'] > 0) & (
-                        df['level'] != 'INFO')]) / added_states)
+                        df['level'] != 'INFO' | df['semantics'] != 'Report')]) / added_states)
         else:
             added_states_info = 0
             added_states_fault = 0
@@ -373,7 +373,7 @@ def prepare_html(df):
                         df['level'] == 'INFO')]) / deleted_states)
             deleted_states_fault = math.ceil(
                 100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0) & (
-                        df['level'] != 'INFO')]) / deleted_states)
+                        df['level'] != 'INFO' | df['semantics'] != 'Report')]) / deleted_states)
         else:
             deleted_states_info = 0
             deleted_states_fault = 0
@@ -386,7 +386,7 @@ def prepare_html(df):
                         df['level'] == 'INFO')]) / recurring_states)
             recurring_states_fault = math.ceil(
                 100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] > 0) & (
-                        df['level'] != 'INFO')]) / recurring_states)
+                        df['level'] != 'INFO' | df['semantics'] != 'Report')]) / recurring_states)
         else:
             recurring_states_info = 0
             recurring_states_fault = 0
@@ -408,11 +408,11 @@ def prepare_html(df):
                 {"increase": math.floor(100 * len(recurring_states_df.loc[
                                                       (recurring_states_df[
                                                            'change_perc'] < -frequency_change_threshold) & (
-                                                              df['level'] != 'INFO')]) / frequency_change),
+                                                              df['level'] != 'INFO' | df['semantics'] != 'Report')]) / frequency_change),
                  "decrease": math.ceil(100 * len(recurring_states_df.loc[
                                                      (recurring_states_df[
                                                           'change_perc'] >= frequency_change_threshold) & (
-                                                             df['level'] != 'INFO')]) / frequency_change)}
+                                                             df['level'] != 'INFO' | df['semantics'] != 'Report')]) / frequency_change)}
         else:
             frequency_change_info = {"increase": 0.0, "decrease": 0.0}
             frequency_change_fault = {"increase": 0.0, "decrease": 0.0}
