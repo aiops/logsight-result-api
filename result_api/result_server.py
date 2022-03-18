@@ -3,7 +3,7 @@ import logging
 import os
 from http import HTTPStatus
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, Response
 from flask import request
 
 from configurator import ConnectionConfig
@@ -22,23 +22,22 @@ def get_tasks():
         verificationDTO = VerificationDTO(**request.args)
     except Exception as e:
         logging.info(e)
-        resp = ErrorResponse(request.args.get("applicationId", ""), "Invalid parameters.",
-                             HTTPStatus.BAD_REQUEST)
-        return resp.json()
+        err = ErrorResponse(request.args.get("applicationId", ""), "Invalid parameters.")
+        return Response(err.json(),status=HTTPStatus.NOT_FOUND)
     result = cv_module.run_verification(application_id=verificationDTO.applicationName,
                                         private_key=verificationDTO.privateKey,
                                         baseline_tag_id=verificationDTO.baselineTag,
                                         compare_tag_id=verificationDTO.compareTag)
     try:
-        if result:
+        if result is not None:
             return jsonify(result)
         else:
-            resp = ErrorResponse(verificationDTO.applicationId, "Data index does not exists, or empty. Try again later.", HTTPStatus.NOT_FOUND)
-            return resp.json()
+            err = ErrorResponse(verificationDTO.applicationId, "Data index does not exists, or empty. Try again later.")
+            return Response(err.json(),status=HTTPStatus.NOT_FOUND)
     except Exception as e:
-        resp = ErrorResponse(verificationDTO.applicationId, "Internal server error",
-                             HTTPStatus.INTERNAL_SERVER_ERROR)
-        return resp.json()
+        logging.error(f"jsonify of compare results failed. Reason: {e}")
+        err = ErrorResponse(verificationDTO.applicationId, "Internal server error")
+        return Response(err.json(),status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
 def parse_arguments() -> Dict:
