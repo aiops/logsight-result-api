@@ -28,7 +28,6 @@ def get_tasks():
                                         private_key=verificationDTO.privateKey,
                                         baseline_tag_id=verificationDTO.baselineTag,
                                         compare_tag_id=verificationDTO.compareTag)
-    print(result)
     try:
         if result is not None:
             return jsonify(result)
