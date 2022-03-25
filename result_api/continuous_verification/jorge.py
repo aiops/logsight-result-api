@@ -357,8 +357,8 @@ def prepare_html(df):
         added_states = len(df.loc[(df['count_baseline'] == 0) & (df['count_candidate'] > 0)])
         if added_states:
             added_states_info = math.floor(100 * len(
-                df.loc[(df['count_baseline'] == 0) & (df['count_candidate'] > 0) & (
-                        df['level'] == 'INFO')]) / added_states)
+                df.loc[(df['count_baseline'] == 0) & (df['count_candidate'] > 0) &  ((
+                        df['level'] == 'INFO') & (df['semantics'] == 'Report'))]) / added_states)
             added_states_fault = math.ceil(100 * len(
                 df.loc[(df['count_baseline'] == 0) & (df['count_candidate'] > 0) & ((
                         df['level'] != 'INFO') | (df['semantics'] != 'Report'))]) / added_states)
@@ -369,8 +369,8 @@ def prepare_html(df):
         deleted_states = len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0)])
         if deleted_states:
             deleted_states_info = math.floor(
-                100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0) & (
-                        df['level'] == 'INFO')]) / deleted_states)
+                100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0) & ((
+                        df['level'] == 'INFO') & (df['semantics'] == 'Report'))]) / deleted_states)
             deleted_states_fault = math.ceil(
                 100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0) & ((
                         df['level'] != 'INFO') | (df['semantics'] != 'Report'))]) / deleted_states)
@@ -382,8 +382,8 @@ def prepare_html(df):
         recurring_states = len(recurring_states_df)
         if recurring_states:
             recurring_states_info = math.floor(
-                100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] > 0) & (
-                        df['level'] == 'INFO')]) / recurring_states)
+                100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] > 0) & ((
+                        df['level'] == 'INFO') & (df['semantics'] == 'Report'))]) / recurring_states)
             recurring_states_fault = math.ceil(
                 100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] > 0) & ((
                         df['level'] != 'INFO') | (df['semantics'] != 'Report'))]) / recurring_states)
@@ -397,12 +397,12 @@ def prepare_html(df):
             frequency_change_info = \
                 {"increase": math.floor(100 * len(recurring_states_df.loc[
                                                       (recurring_states_df[
-                                                           'change_perc'] < -frequency_change_threshold) & (
-                                                              df['level'] == 'INFO')]) / frequency_change),
+                                                           'change_perc'] < -frequency_change_threshold) & ((
+                        df['level'] == 'INFO') & (df['semantics'] == 'Report'))]) / frequency_change),
                  "decrease": math.ceil(100 * len(recurring_states_df.loc[
                                                      (recurring_states_df[
-                                                          'change_perc'] >= frequency_change_threshold) & (
-                                                             df['level'] == 'INFO')]) / frequency_change)}
+                                                          'change_perc'] >= frequency_change_threshold) & ((
+                        df['level'] == 'INFO') & (df['semantics'] == 'Report'))]) / frequency_change)}
 
             frequency_change_fault = \
                 {"increase": math.floor(100 * len(recurring_states_df.loc[
