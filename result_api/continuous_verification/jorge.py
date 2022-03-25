@@ -436,6 +436,8 @@ def prepare_html(df):
 
         template_tbl_cols = ['Risk', 'Description', 'Baseline', 'Candidate', 'State', 'Code',
                              'Count', 'Change', 'Coverage', 'Level', 'Semantics']
+        df.drop(["start_date"], axis=1, inplace=True)
+        df.drop(["end_date"], axis=1, inplace=True)
         template_tbl_rows = df.to_dict(orient='records')
 
         return dict(
