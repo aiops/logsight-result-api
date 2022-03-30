@@ -1,5 +1,6 @@
-from elasticsearch import Elasticsearch
+import os
 
+from elasticsearch import Elasticsearch
 
 class ElasticsearchDataSource:
 
@@ -19,7 +20,7 @@ class ElasticsearchDataSource:
             index=index,
             doc_type='_doc',
             body={
-                "size": 10000,
+                "size" : os.environ.get("ES_QUERY_SIZE", 10000),
                 "query": {
                     "match": {"tag": tag}
                 }
