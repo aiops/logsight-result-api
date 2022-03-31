@@ -21,7 +21,7 @@ class ContinuousVerification:
         try:
             templates = self.es.get_log_ad_data(private_key=private_key, app=application_id, tag=tag)
         except Exception as e:
-            logging.error("Data index does not exists.")
+            logging.exception(e)
             return None
         if (len(templates)) == 0:
             logging.error("No data was found on the specified index.")

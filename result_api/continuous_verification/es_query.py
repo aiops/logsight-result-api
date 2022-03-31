@@ -1,6 +1,8 @@
+import logging
 import os
 
 from elasticsearch import Elasticsearch
+
 
 class ElasticsearchDataSource:
 
@@ -13,6 +15,10 @@ class ElasticsearchDataSource:
             max_retries=5,
             retry_on_timeout=True
         )
+        self.es.indices.put_settings(
+            body={"index": {
+                "max_result_window": 500000
+            }})
 
     def get_log_ad_data(self, private_key: str, app: str, tag: str):
         index = f"{private_key}_{app}_log_ad"
@@ -20,7 +26,7 @@ class ElasticsearchDataSource:
             index=index,
             doc_type='_doc',
             body={
-                "size" : os.environ.get("ES_QUERY_SIZE", 10000),
+                "size": os.environ.get("ES_QUERY_SIZE", 10000),
                 "query": {
                     "match": {"tag": tag}
                 }
