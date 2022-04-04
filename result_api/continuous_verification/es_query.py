@@ -15,7 +15,7 @@ class ElasticsearchDataSource:
             max_retries=5,
             retry_on_timeout=True
         )
-        self.es.indices.put_settings(
+        self.es.indices.put_settings(index="_all",
             body={"index": {
                 "max_result_window": 500000
             }})
