@@ -15,12 +15,12 @@ class ElasticsearchDataSource:
             max_retries=5,
             retry_on_timeout=True
         )
+
+    def get_log_ad_data(self, private_key: str, app: str, tag: str):
         self.es.indices.put_settings(index="_all",
             body={"index": {
                 "max_result_window": 500000
             }})
-
-    def get_log_ad_data(self, private_key: str, app: str, tag: str):
         index = f"{private_key}_{app}_log_ad"
         res = self.es.search(
             index=index,
