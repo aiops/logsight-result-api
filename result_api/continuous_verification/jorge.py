@@ -139,9 +139,9 @@ def transform_html(df):
                 return 0
 
         risk_tbl = [(0, 1, 0, 0, "Added state", 0, "fa fa-plus-circle font-medium-1"),
-                    (0, 1, 1, 0, "Added state (E)", 80, "fa fa-exclamation-triangle font-medium-1"),
-                    (0, 1, 0, 1, "Added state (F)", 80, "fa fa-exclamation-triangle font-medium-1"),
-                    (0, 1, 1, 1, "Added state (E/F)", 100, "fa fa-exclamation-triangle font-medium-1"),
+                    (0, 1, 1, 0, "Added state (E)", 70, "fa fa-exclamation-triangle font-medium-1"),
+                    (0, 1, 0, 1, "Added state (F)", 60, "fa fa-exclamation-triangle font-medium-1"),
+                    (0, 1, 1, 1, "Added state (E/F)", 80, "fa fa-exclamation-triangle font-medium-1"),
                     (1, 0, 0, 0, "Deleted state", 0, "fa fa-minus-circle font-medium-1"),
                     (1, 0, 1, 0, "Deleted state (E)", 0, "fa fa-minus-circle font-medium-1"),
                     (1, 0, 0, 1, "Deleted state (F)", 0, "fa fa-minus-circle font-medium-1"),
@@ -333,10 +333,13 @@ def prepare_html(df):
     if df is not None:
         percentage = int(len(df) * 0.3)
         top_k = df.head(percentage)
+        risk = top_k['risk_score'].max()
+
         if len(top_k['risk_score']) > 0:
-            risk = int(top_k['risk_score'].sum() / len(top_k['risk_score']))
+            risk = risk + min([int(top_k['risk_score'].sum() / len(top_k['risk_score'])), 100 - top_k['risk_score'].max()])
         else:
             risk = 0
+        risk = int(risk)
         risk_color = 'blue' if risk < 50 else 'red'
         count_baseline = df['count_baseline'].sum()
         count_candidate = df['count_candidate'].sum()
