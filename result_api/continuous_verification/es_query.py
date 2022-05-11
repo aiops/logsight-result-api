@@ -1,3 +1,6 @@
+import logging
+import os
+
 from elasticsearch import Elasticsearch
 
 
@@ -14,12 +17,16 @@ class ElasticsearchDataSource:
         )
 
     def get_log_ad_data(self, private_key: str, app: str, tag: str):
+        self.es.indices.put_settings(index="_all",
+            body={"index": {
+                "max_result_window": 500000
+            }})
         index = f"{private_key}_{app}_log_ad"
         res = self.es.search(
             index=index,
             doc_type='_doc',
             body={
-                "size": 10000,
+                "size": os.environ.get("ES_QUERY_SIZE", 10000),
                 "query": {
                     "match": {"tag": tag}
                 }

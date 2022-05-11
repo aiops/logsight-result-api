@@ -6,7 +6,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from config import global_vars
+from configs import global_vars
 from configurator.config_manager import ConnectionConfig
 from .es_query import ElasticsearchDataSource
 
@@ -21,7 +21,7 @@ class ContinuousVerification:
         try:
             templates = self.es.get_log_ad_data(private_key=private_key, app=application_id, tag=tag)
         except Exception as e:
-            logging.error("Data index does not exists.")
+            logging.exception(e)
             return None
         if (len(templates)) == 0:
             logging.error("No data was found on the specified index.")
@@ -80,6 +80,8 @@ def transform_etl(df_baseline, df_candidate):
 
         df = pd.concat([df_baseline, df_candidate], axis=0)
         level = get_level(df)
+        if 'level' in level.keys():
+            level = level['level']
         semantic_level = get_semantic_level(df)
 
         trend_baseline = get_template_trend(df_baseline)
@@ -137,9 +139,9 @@ def transform_html(df):
                 return 0
 
         risk_tbl = [(0, 1, 0, 0, "Added state", 0, "fa fa-plus-circle font-medium-1"),
-                    (0, 1, 1, 0, "Added state (E)", 80, "fa fa-exclamation-triangle font-medium-1"),
-                    (0, 1, 0, 1, "Added state (F)", 80, "fa fa-exclamation-triangle font-medium-1"),
-                    (0, 1, 1, 1, "Added state (E/F)", 100, "fa fa-exclamation-triangle font-medium-1"),
+                    (0, 1, 1, 0, "Added state (E)", 70, "fa fa-exclamation-triangle font-medium-1"),
+                    (0, 1, 0, 1, "Added state (F)", 60, "fa fa-exclamation-triangle font-medium-1"),
+                    (0, 1, 1, 1, "Added state (E/F)", 80, "fa fa-exclamation-triangle font-medium-1"),
                     (1, 0, 0, 0, "Deleted state", 0, "fa fa-minus-circle font-medium-1"),
                     (1, 0, 1, 0, "Deleted state (E)", 0, "fa fa-minus-circle font-medium-1"),
                     (1, 0, 0, 1, "Deleted state (F)", 0, "fa fa-minus-circle font-medium-1"),
@@ -271,53 +273,52 @@ def transform_html(df):
                         index=False)]
 
     if df is not None:
-        formatted_df = df.assign(dates=lambda x: [format_dates(s, e) for s, e in
-                                                  x[['start_date', 'end_date']].itertuples(index=False)],
-                                 count_total=lambda x: [b + c for b, c in
-                                                        x[['count_baseline', 'count_candidate']].itertuples(
-                                                            index=False)],
-                                 count_gtotal=lambda x: x['count_baseline'].sum() + x['count_candidate'].sum(),
-                                 perc_baseline=lambda x: [get_percentage(b, c)
-                                                          for b, c in
-                                                          x[['count_baseline', 'count_candidate']].itertuples(
-                                                              index=False)],
-                                 perc_candidate=lambda x: [get_percentage(c, b)
-                                                           for b, c in
-                                                           x[['count_baseline', 'count_candidate']].itertuples(
-                                                               index=False)],
-                                 b_color=lambda x: [get_percentage_color(b, t, color='silver')
-                                                    for b, t in
-                                                    x[['count_baseline', 'count_total']].itertuples(index=False)],
-                                 c_color=lambda x: [get_percentage_color(c, t, color='silver')
-                                                    for c, t in
-                                                    x[['count_candidate', 'count_total']].itertuples(index=False)],
-                                 change_count=lambda x: [get_change_count(b, c, lambda s: f'{s[0:0]}')
-                                                         for b, c in
-                                                         x[['count_baseline', 'count_candidate']].itertuples(
-                                                             index=False)],
-                                 change_color=lambda x: x['change_count'].map(lambda y: get_change_color(y)),
-                                 change_perc=lambda x: [get_change_perc(a, b)
-                                                        for a, b in
-                                                        x[['count_baseline', 'count_candidate']].itertuples(
-                                                            index=False)],
-                                 coverage=lambda x: coverage(x),
-                                 risk_score=lambda x: [get_risk(b, c, p, l, s)[1] for b, c, p, l, s in
-                                                       x[['count_baseline', 'count_candidate', 'change_perc', 'level',
-                                                          'semantics']].itertuples(index=False)],
-                                 risk_description=lambda x: [get_risk(b, c, p, l, s)[0] for b, c, p, l, s in
-                                                             x[['count_baseline', 'count_candidate', 'change_perc',
-                                                                'level',
-                                                                'semantics']].itertuples(index=False)],
-                                 risk_symbol=lambda x: [get_risk(b, c, p, l, s)[2] for b, c, p, l, s in
-                                                        x[['count_baseline', 'count_candidate', 'change_perc', 'level',
-                                                           'semantics']].itertuples(index=False)],
-                                 risk_color=lambda x: x['risk_score'].map(
-                                     lambda y: get_risk_color(y, (0, 100), reverse=True)),
-                                 template_code=lambda x: x['template'].map(lambda y: get_template_code(y)),
-                                 count_base=lambda x: x['count_baseline'].map(add_comma),
-                                 count_cand=lambda x: x['count_candidate'].map(add_comma),
-                                 semantic_color=lambda x: [get_semantic_color(x, y) for x, y in
-                                                           x[['level', 'semantics']].itertuples(index=False)]) \
+        formatted_df = df.assign(
+            count_total=lambda x: [b + c for b, c in
+                                   x[['count_baseline', 'count_candidate']].itertuples(
+                                       index=False)],
+            count_gtotal=lambda x: x['count_baseline'].sum() + x['count_candidate'].sum(),
+            perc_baseline=lambda x: [get_percentage(b, c)
+                                     for b, c in
+                                     x[['count_baseline', 'count_candidate']].itertuples(
+                                         index=False)],
+            perc_candidate=lambda x: [get_percentage(c, b)
+                                      for b, c in
+                                      x[['count_baseline', 'count_candidate']].itertuples(
+                                          index=False)],
+            b_color=lambda x: [get_percentage_color(b, t, color='silver')
+                               for b, t in
+                               x[['count_baseline', 'count_total']].itertuples(index=False)],
+            c_color=lambda x: [get_percentage_color(c, t, color='silver')
+                               for c, t in
+                               x[['count_candidate', 'count_total']].itertuples(index=False)],
+            change_count=lambda x: [get_change_count(b, c, lambda s: f'{s[0:0]}')
+                                    for b, c in
+                                    x[['count_baseline', 'count_candidate']].itertuples(
+                                        index=False)],
+            change_color=lambda x: x['change_count'].map(lambda y: get_change_color(y)),
+            change_perc=lambda x: [get_change_perc(a, b)
+                                   for a, b in
+                                   x[['count_baseline', 'count_candidate']].itertuples(
+                                       index=False)],
+            coverage=lambda x: coverage(x),
+            risk_score=lambda x: [get_risk(b, c, p, l, s)[1] for b, c, p, l, s in
+                                  x[['count_baseline', 'count_candidate', 'change_perc', 'level',
+                                     'semantics']].itertuples(index=False)],
+            risk_description=lambda x: [get_risk(b, c, p, l, s)[0] for b, c, p, l, s in
+                                        x[['count_baseline', 'count_candidate', 'change_perc',
+                                           'level',
+                                           'semantics']].itertuples(index=False)],
+            risk_symbol=lambda x: [get_risk(b, c, p, l, s)[2] for b, c, p, l, s in
+                                   x[['count_baseline', 'count_candidate', 'change_perc', 'level',
+                                      'semantics']].itertuples(index=False)],
+            risk_color=lambda x: x['risk_score'].map(
+                lambda y: get_risk_color(y, (0, 100), reverse=True)),
+            template_code=lambda x: x['template'].map(lambda y: get_template_code(y)),
+            count_base=lambda x: x['count_baseline'].map(add_comma),
+            count_cand=lambda x: x['count_candidate'].map(add_comma),
+            semantic_color=lambda x: [get_semantic_color(x, y) for x, y in
+                                      x[['level', 'semantics']].itertuples(index=False)]) \
             .fillna('')
 
         return formatted_df.sort_values(by=['risk_score', 'coverage'], ascending=False)
@@ -332,10 +333,13 @@ def prepare_html(df):
     if df is not None:
         percentage = int(len(df) * 0.3)
         top_k = df.head(percentage)
+        risk = top_k['risk_score'].max()
+
         if len(top_k['risk_score']) > 0:
-            risk = int(top_k['risk_score'].sum() / len(top_k['risk_score']))
+            risk = risk + min([int(top_k['risk_score'].sum() / len(top_k['risk_score'])), 100 - top_k['risk_score'].max()])
         else:
             risk = 0
+        risk = int(risk)
         risk_color = 'blue' if risk < 50 else 'red'
         count_baseline = df['count_baseline'].sum()
         count_candidate = df['count_candidate'].sum()
@@ -350,17 +354,17 @@ def prepare_html(df):
             candidate_perc = 0
 
         baseline_perc, candidate_perc = baseline_perc - candidate_perc, candidate_perc - baseline_perc
-        baseline_perc = trend_symbol(baseline_perc) + str(baseline_perc)
-        candidate_perc = trend_symbol(candidate_perc) + str(candidate_perc)
+        baseline_perc = str(baseline_perc)
+        candidate_perc = str(candidate_perc)
 
         added_states = len(df.loc[(df['count_baseline'] == 0) & (df['count_candidate'] > 0)])
         if added_states:
             added_states_info = math.floor(100 * len(
-                df.loc[(df['count_baseline'] == 0) & (df['count_candidate'] > 0) & (
-                        df['level'] == 'INFO')]) / added_states)
+                df.loc[(df['count_baseline'] == 0) & (df['count_candidate'] > 0) &  ((
+                        df['level'] == 'INFO') & (df['semantics'] == 'Report'))]) / added_states)
             added_states_fault = math.ceil(100 * len(
-                df.loc[(df['count_baseline'] == 0) & (df['count_candidate'] > 0) & (
-                        df['level'] != 'INFO')]) / added_states)
+                df.loc[(df['count_baseline'] == 0) & (df['count_candidate'] > 0) & ((
+                        df['level'] != 'INFO') | (df['semantics'] != 'Report'))]) / added_states)
         else:
             added_states_info = 0
             added_states_fault = 0
@@ -368,11 +372,11 @@ def prepare_html(df):
         deleted_states = len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0)])
         if deleted_states:
             deleted_states_info = math.floor(
-                100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0) & (
-                        df['level'] == 'INFO')]) / deleted_states)
+                100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0) & ((
+                        df['level'] == 'INFO') & (df['semantics'] == 'Report'))]) / deleted_states)
             deleted_states_fault = math.ceil(
-                100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0) & (
-                        df['level'] != 'INFO')]) / deleted_states)
+                100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0) & ((
+                        df['level'] != 'INFO') | (df['semantics'] != 'Report'))]) / deleted_states)
         else:
             deleted_states_info = 0
             deleted_states_fault = 0
@@ -381,11 +385,11 @@ def prepare_html(df):
         recurring_states = len(recurring_states_df)
         if recurring_states:
             recurring_states_info = math.floor(
-                100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] > 0) & (
-                        df['level'] == 'INFO')]) / recurring_states)
+                100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] > 0) & ((
+                        df['level'] == 'INFO') & (df['semantics'] == 'Report'))]) / recurring_states)
             recurring_states_fault = math.ceil(
-                100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] > 0) & (
-                        df['level'] != 'INFO')]) / recurring_states)
+                100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] > 0) & ((
+                        df['level'] != 'INFO') | (df['semantics'] != 'Report'))]) / recurring_states)
         else:
             recurring_states_info = 0
             recurring_states_fault = 0
@@ -396,22 +400,22 @@ def prepare_html(df):
             frequency_change_info = \
                 {"increase": math.floor(100 * len(recurring_states_df.loc[
                                                       (recurring_states_df[
-                                                           'change_perc'] < -frequency_change_threshold) & (
-                                                              df['level'] == 'INFO')]) / frequency_change),
+                                                           'change_perc'] < -frequency_change_threshold) & ((
+                        df['level'] == 'INFO') & (df['semantics'] == 'Report'))]) / frequency_change),
                  "decrease": math.ceil(100 * len(recurring_states_df.loc[
                                                      (recurring_states_df[
-                                                          'change_perc'] >= frequency_change_threshold) & (
-                                                             df['level'] == 'INFO')]) / frequency_change)}
+                                                          'change_perc'] >= frequency_change_threshold) & ((
+                        df['level'] == 'INFO') & (df['semantics'] == 'Report'))]) / frequency_change)}
 
             frequency_change_fault = \
                 {"increase": math.floor(100 * len(recurring_states_df.loc[
                                                       (recurring_states_df[
-                                                           'change_perc'] < -frequency_change_threshold) & (
-                                                                  df['level'] != 'INFO')]) / frequency_change),
+                                                           'change_perc'] < -frequency_change_threshold) & ((
+                        df['level'] != 'INFO') | (df['semantics'] != 'Report'))]) / frequency_change),
                  "decrease": math.ceil(100 * len(recurring_states_df.loc[
                                                      (recurring_states_df[
-                                                          'change_perc'] >= frequency_change_threshold) & (
-                                                                 df['level'] != 'INFO')]) / frequency_change)}
+                                                          'change_perc'] >= frequency_change_threshold) & ((
+                        df['level'] != 'INFO') | (df['semantics'] != 'Report'))]) / frequency_change)}
         else:
             frequency_change_info = {"increase": 0.0, "decrease": 0.0}
             frequency_change_fault = {"increase": 0.0, "decrease": 0.0}
@@ -433,8 +437,10 @@ def prepare_html(df):
         frequency_baseline = list(sdf.count_baseline)[:frequency_topk]
         frequency_candidate = list(sdf.count_candidate)[:frequency_topk]
 
-        template_tbl_cols = ['Risk', 'Description', 'Baseline', 'Candidate', 'Template', 'Code',
+        template_tbl_cols = ['Risk', 'Description', 'Baseline', 'Candidate', 'State', 'Code',
                              'Count', 'Change', 'Coverage', 'Level', 'Semantics']
+        df.drop(["start_date"], axis=1, inplace=True)
+        df.drop(["end_date"], axis=1, inplace=True)
         template_tbl_rows = df.to_dict(orient='records')
 
         return dict(
@@ -442,7 +448,7 @@ def prepare_html(df):
             risk=risk,  #
             total_n_log_messages=int(total_n_log_messages),  #
             count_baseline=int(count_baseline),  #
-            count_candidate=int(count_candidate), #
+            count_candidate=int(count_candidate),  #
             candidate_perc=candidate_perc,  #
             added_states=added_states,  #
             added_states_info=added_states_info,  #
