@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKER = credentials('dockerhub')
         DOCKER_REPO = "logsight/logsight-result-api"
+        SONAR_PROJECT_KEY = "aiops_logsight-result-api"
     }
 
     stages {
@@ -38,7 +39,7 @@ pipeline {
                             unstash "test-reports"
                             withSonarQubeEnv('logsight-sonarqube') {
                                 sh """ 
-                                    sonar-scanner -Dsonar.projectKey=aiops_logsight -Dsonar.branch.name=$BRANCH_NAME \
+                                    sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.branch.name=$BRANCH_NAME \
                                         -Dsonar.organization=logsight \
                                         -Dsonar.sources=result_api -Dsonar.tests=tests/. \
                                         -Dsonar.inclusions="**/*.py" \
@@ -46,6 +47,11 @@ pipeline {
                                         -Dsonar.test.reportPath=test-report.xml
                                 """
                             }
+                        }
+                        timeout(time: 15, unit: 'MINUTES') {
+                            // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
+                            // true = set pipeline to UNSTABLE, false = don't
+                            waitForQualityGate abortPipeline: true
                         }
                     }
                 }
