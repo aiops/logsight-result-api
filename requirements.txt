@@ -3,5 +3,7 @@ numpy==1.21.4
 pandas==1.3.5
 pydantic==1.8.2
 flask==2.0.3
-waitress
-config
+waitress==2.1.1
+config==0.5.1
+pytest==7.1.2
+pytest-cov==3.0.0
