@@ -16,28 +16,28 @@ from responses.responses import ErrorResponse
 app = Flask(__name__, template_folder="./")
 
 
-@app.route('/api/v1/compare', methods=['GET'])
+@app.route('/api/v1/compare', methods=['POST'])
 def get_tasks():
     try:
-        verificationDTO = VerificationDTO(**request.args)
+        verificationDTO = VerificationDTO(**request.json)
     except Exception as e:
         logging.info(e)
         err = ErrorResponse(request.args.get("applicationId", ""), "Invalid parameters.")
-        return Response(err.json(),status=HTTPStatus.NOT_FOUND)
+        return Response(err.json(), status=HTTPStatus.NOT_FOUND)
     result = cv_module.run_verification(application_id=verificationDTO.applicationName,
                                         private_key=verificationDTO.privateKey,
-                                        baseline_tag_id=verificationDTO.baselineTag,
-                                        compare_tag_id=verificationDTO.compareTag)
+                                        baseline_tags=verificationDTO.baselineTags,
+                                        candidate_tags=verificationDTO.candidateTags)
     try:
         if result is not None:
             return jsonify(result)
         else:
             err = ErrorResponse(verificationDTO.applicationId, "Data index does not exists, or empty. Try again later.")
-            return Response(err.json(),status=HTTPStatus.NOT_FOUND)
+            return Response(err.json(), status=HTTPStatus.NOT_FOUND)
     except Exception as e:
         logging.error(f"jsonify of compare results failed. Reason: {e}")
         err = ErrorResponse(verificationDTO.applicationId, "Internal server error")
-        return Response(err.json(),status=HTTPStatus.INTERNAL_SERVER_ERROR)
+        return Response(err.json(), status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
 def parse_arguments() -> Dict:
