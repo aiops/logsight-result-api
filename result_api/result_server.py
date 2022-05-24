@@ -12,6 +12,7 @@ from typing import Dict
 from dto.verification_dto import VerificationDTO
 from configs.global_vars import CONFIG_PATH
 from responses.responses import ErrorResponse
+import json
 
 app = Flask(__name__, template_folder="./")
 
@@ -23,11 +24,11 @@ def get_tasks():
     except Exception as e:
         logging.info(e)
         err = ErrorResponse(request.args.get("applicationId", ""), "Invalid parameters.")
-        return Response(err.json(), status=HTTPStatus.NOT_FOUND)
+        return Response(err.json(), status=HTTPStatus.BAD_REQUEST)
     result = cv_module.run_verification(application_id=verificationDTO.applicationName,
                                         private_key=verificationDTO.privateKey,
-                                        baseline_tags=verificationDTO.baselineTags,
-                                        candidate_tags=verificationDTO.candidateTags)
+                                        baseline_tags=json.loads(verificationDTO.baselineTags),
+                                        candidate_tags=json.loads(verificationDTO.candidateTags))
     try:
         if result is not None:
             return jsonify(result)
