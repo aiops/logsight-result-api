@@ -57,6 +57,8 @@ class ContinuousVerification:
         df_html = transform_html(df_etl)
         output = prepare_html(df_html)
         output['timestamp'] = datetime.datetime.utcnow().isoformat()
+        output['baseline_tags'] = baseline_tags
+        output['candidate_tags'] = candidate_tags
         self.es.es.index(private_key + "_" + application_id + "_verifications", output)
         return output
 
@@ -314,7 +316,6 @@ def transform_html(df):
                                       'semantics']].itertuples(index=False)],
             risk_color=lambda x: x['risk_score'].map(
                 lambda y: get_risk_color(y, (0, 100), reverse=True)),
-            template_code=lambda x: x['template'].map(lambda y: get_template_code(y)),
             count_base=lambda x: x['count_baseline'].map(add_comma),
             count_cand=lambda x: x['count_candidate'].map(add_comma),
             semantic_color=lambda x: [get_semantic_color(x, y) for x, y in
