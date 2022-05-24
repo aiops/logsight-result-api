@@ -55,7 +55,10 @@ class ContinuousVerification:
         df_baseline, df_candidate = self.extract_data(private_key, application_id, baseline_tags, candidate_tags)
         df_etl = transform_etl(df_baseline, df_candidate)
         df_html = transform_html(df_etl)
-        return prepare_html(df_html)
+        output = prepare_html(df_html)
+        output['timestamp'] = datetime.datetime.utcnow().isoformat()
+        self.es.es.index(private_key + "_" + application_id + "_verifications", output)
+        return output
 
 
 def transform_etl(df_baseline, df_candidate):
@@ -290,17 +293,10 @@ def transform_html(df):
                                       for b, c in
                                       x[['count_baseline', 'count_candidate']].itertuples(
                                           index=False)],
-            b_color=lambda x: [get_percentage_color(b, t, color='silver')
-                               for b, t in
-                               x[['count_baseline', 'count_total']].itertuples(index=False)],
-            c_color=lambda x: [get_percentage_color(c, t, color='silver')
-                               for c, t in
-                               x[['count_candidate', 'count_total']].itertuples(index=False)],
             change_count=lambda x: [get_change_count(b, c, lambda s: f'{s[0:0]}')
                                     for b, c in
                                     x[['count_baseline', 'count_candidate']].itertuples(
                                         index=False)],
-            change_color=lambda x: x['change_count'].map(lambda y: get_change_color(y)),
             change_perc=lambda x: [get_change_perc(a, b)
                                    for a, b in
                                    x[['count_baseline', 'count_candidate']].itertuples(
@@ -367,13 +363,13 @@ def prepare_html(df):
             added_states_info = math.floor(100 * len(
                 df.loc[(df['count_baseline'] == 0) & (df['count_candidate'] > 0) & ((
                                                                                             df['level'] == 'INFO') & (
-                                                                                                df[
-                                                                                                    'semantics'] == 'Report'))]) / added_states)
+                                                                                            df[
+                                                                                                'semantics'] == 'Report'))]) / added_states)
             added_states_fault = math.ceil(100 * len(
                 df.loc[(df['count_baseline'] == 0) & (df['count_candidate'] > 0) & ((
                                                                                             df['level'] != 'INFO') | (
-                                                                                                df[
-                                                                                                    'semantics'] != 'Report'))]) / added_states)
+                                                                                            df[
+                                                                                                'semantics'] != 'Report'))]) / added_states)
         else:
             added_states_info = 0
             added_states_fault = 0
@@ -384,14 +380,14 @@ def prepare_html(df):
                 100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0) & ((
                                                                                                       df[
                                                                                                           'level'] == 'INFO') & (
-                                                                                                          df[
-                                                                                                              'semantics'] == 'Report'))]) / deleted_states)
+                                                                                                      df[
+                                                                                                          'semantics'] == 'Report'))]) / deleted_states)
             deleted_states_fault = math.ceil(
                 100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] == 0) & ((
                                                                                                       df[
                                                                                                           'level'] != 'INFO') | (
-                                                                                                          df[
-                                                                                                              'semantics'] != 'Report'))]) / deleted_states)
+                                                                                                      df[
+                                                                                                          'semantics'] != 'Report'))]) / deleted_states)
         else:
             deleted_states_info = 0
             deleted_states_fault = 0
@@ -403,14 +399,14 @@ def prepare_html(df):
                 100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] > 0) & ((
                                                                                                      df[
                                                                                                          'level'] == 'INFO') & (
-                                                                                                         df[
-                                                                                                             'semantics'] == 'Report'))]) / recurring_states)
+                                                                                                     df[
+                                                                                                         'semantics'] == 'Report'))]) / recurring_states)
             recurring_states_fault = math.ceil(
                 100 * len(df.loc[(df['count_baseline'] > 0) & (df['count_candidate'] > 0) & ((
                                                                                                      df[
                                                                                                          'level'] != 'INFO') | (
-                                                                                                         df[
-                                                                                                             'semantics'] != 'Report'))]) / recurring_states)
+                                                                                                     df[
+                                                                                                         'semantics'] != 'Report'))]) / recurring_states)
         else:
             recurring_states_info = 0
             recurring_states_fault = 0
@@ -424,15 +420,15 @@ def prepare_html(df):
                                                            'change_perc'] < -frequency_change_threshold) & ((
                                                                                                                     df[
                                                                                                                         'level'] == 'INFO') & (
-                                                                                                                        df[
-                                                                                                                            'semantics'] == 'Report'))]) / frequency_change),
+                                                                                                                    df[
+                                                                                                                        'semantics'] == 'Report'))]) / frequency_change),
                  "decrease": math.ceil(100 * len(recurring_states_df.loc[
                                                      (recurring_states_df[
                                                           'change_perc'] >= frequency_change_threshold) & ((
                                                                                                                    df[
                                                                                                                        'level'] == 'INFO') & (
-                                                                                                                       df[
-                                                                                                                           'semantics'] == 'Report'))]) / frequency_change)}
+                                                                                                                   df[
+                                                                                                                       'semantics'] == 'Report'))]) / frequency_change)}
 
             frequency_change_fault = \
                 {"increase": math.floor(100 * len(recurring_states_df.loc[
@@ -440,15 +436,15 @@ def prepare_html(df):
                                                            'change_perc'] < -frequency_change_threshold) & ((
                                                                                                                     df[
                                                                                                                         'level'] != 'INFO') | (
-                                                                                                                        df[
-                                                                                                                            'semantics'] != 'Report'))]) / frequency_change),
+                                                                                                                    df[
+                                                                                                                        'semantics'] != 'Report'))]) / frequency_change),
                  "decrease": math.ceil(100 * len(recurring_states_df.loc[
                                                      (recurring_states_df[
                                                           'change_perc'] >= frequency_change_threshold) & ((
                                                                                                                    df[
                                                                                                                        'level'] != 'INFO') | (
-                                                                                                                       df[
-                                                                                                                           'semantics'] != 'Report'))]) / frequency_change)}
+                                                                                                                   df[
+                                                                                                                       'semantics'] != 'Report'))]) / frequency_change)}
         else:
             frequency_change_info = {"increase": 0.0, "decrease": 0.0}
             frequency_change_fault = {"increase": 0.0, "decrease": 0.0}
@@ -496,9 +492,6 @@ def prepare_html(df):
             frequency_change=frequency_change,  #
             frequency_change_info=frequency_change_info,  #
             frequency_change_fault=frequency_change_fault,  #
-            log_level_x_axis=log_level_x_axis,
-            log_level_timeseries=log_level_timeseries,
-            frequency_labels=frequency_labels,
             frequency_baseline=frequency_baseline,  #
             frequency_candidate=frequency_candidate,  #
             cols=template_tbl_cols,
