@@ -17,12 +17,12 @@ class ElasticsearchDataSource:
             retry_on_timeout=True
         )
 
-    def get_log_ad_data(self, private_key: str, app: str, tags: Dict[str, str]):
+    def get_log_ad_data(self, private_key: str, tags: Dict[str, str]):
         self.es.indices.put_settings(index="_all",
                                      body={"index": {
                                          "max_result_window": 500000
                                      }})
-        index = f"{private_key}_{app}*"
+        index = f"{private_key}_*"
         filter_query = []
         for tag_key in tags:
             filter_query.append({"match_phrase": {f"tags.{tag_key}.keyword": tags[tag_key]}})

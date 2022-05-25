@@ -23,9 +23,9 @@ def get_tasks():
         verificationDTO = VerificationDTO(**request.json)
     except Exception as e:
         logging.info(e)
-        err = ErrorResponse(request.args.get("applicationId", ""), "Invalid parameters.")
+        err = ErrorResponse("Invalid request body parameters.")
         return Response(err.json(), status=HTTPStatus.BAD_REQUEST)
-    result = cv_module.run_verification(application_id=verificationDTO.applicationName,
+    result = cv_module.run_verification(
                                         private_key=verificationDTO.privateKey,
                                         baseline_tags=json.loads(verificationDTO.baselineTags),
                                         candidate_tags=json.loads(verificationDTO.candidateTags))
@@ -33,11 +33,11 @@ def get_tasks():
         if result is not None:
             return jsonify(result)
         else:
-            err = ErrorResponse(verificationDTO.applicationId, "Data index does not exists, or empty. Try again later.")
+            err = ErrorResponse("Data index does not exists, or empty. Try again later.")
             return Response(err.json(), status=HTTPStatus.NOT_FOUND)
     except Exception as e:
         logging.error(f"jsonify of compare results failed. Reason: {e}")
-        err = ErrorResponse(verificationDTO.applicationId, "Internal server error")
+        err = ErrorResponse("Internal server error")
         return Response(err.json(), status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
 

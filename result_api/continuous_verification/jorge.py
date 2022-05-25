@@ -16,10 +16,10 @@ class ContinuousVerification:
         self.es = ElasticsearchDataSource(
             **ConnectionConfig(os.path.join(global_vars.CONFIG_PATH, connections_conf_file)).get_elasticsearch_params())
 
-    def extract_data_for_tag(self, private_key, application_id, tags):
+    def extract_data_for_tag(self, private_key, tags):
         # quality = self.es.get_log_ad_data(private_key=private_key, app=application_id, tag=tag)
         try:
-            templates = self.es.get_log_ad_data(private_key=private_key, app=application_id, tags=tags)
+            templates = self.es.get_log_ad_data(private_key=private_key, tags=tags)
         except Exception as e:
             logging.exception(e)
             return None
@@ -39,27 +39,27 @@ class ContinuousVerification:
         # dft.set_index('timestamp', inplace=True)
         return dft[['level', 'template', 'tags', 'predicted_level']]
 
-    def extract_data(self, private_key, application_id, baseline_tags, candidate_tags):
-        df_baseline = self.extract_data_for_tag(private_key, application_id, baseline_tags)
-        df_candidate = self.extract_data_for_tag(private_key, application_id, candidate_tags)
+    def extract_data(self, private_key, baseline_tags, candidate_tags):
+        df_baseline = self.extract_data_for_tag(private_key, baseline_tags)
+        df_candidate = self.extract_data_for_tag(private_key, candidate_tags)
         if df_baseline is not None and df_candidate is not None:
             return df_baseline, df_candidate
         else:
             return None, None
 
-    def run_verification(self, private_key="", application_id="", baseline_tags=None, candidate_tags=None):
+    def run_verification(self, private_key="", baseline_tags=None, candidate_tags=None):
         if candidate_tags is None:
             candidate_tags = {}
         if baseline_tags is None:
             baseline_tags = {}
-        df_baseline, df_candidate = self.extract_data(private_key, application_id, baseline_tags, candidate_tags)
+        df_baseline, df_candidate = self.extract_data(private_key, baseline_tags, candidate_tags)
         df_etl = transform_etl(df_baseline, df_candidate)
         df_html = transform_html(df_etl)
         output = prepare_html(df_html)
         output['timestamp'] = datetime.datetime.utcnow().isoformat()
         output['baseline_tags'] = baseline_tags
         output['candidate_tags'] = candidate_tags
-        self.es.es.index(private_key + "_" + application_id + "_verifications", output)
+        self.es.es.index(private_key + "_verifications", output)
         return output
 
 
