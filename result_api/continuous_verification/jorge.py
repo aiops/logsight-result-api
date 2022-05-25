@@ -2,6 +2,7 @@ import datetime
 import logging
 import math
 import os
+from enum import Enum
 
 import numpy as np
 import pandas as pd
@@ -9,6 +10,10 @@ import pandas as pd
 from configs import global_vars
 from configurator.config_manager import ConnectionConfig
 from .es_query import ElasticsearchDataSource
+
+
+class VerificationStatus:
+    RAISED = "RAISED"
 
 
 class ContinuousVerification:
@@ -59,6 +64,7 @@ class ContinuousVerification:
         output['timestamp'] = datetime.datetime.utcnow().isoformat()
         output['baseline_tags'] = baseline_tags
         output['candidate_tags'] = candidate_tags
+        output['status'] = VerificationStatus.RAISED
         self.es.es.index(private_key + "_verifications", output)
         return output
 
