@@ -13,7 +13,7 @@ from .es_query import ElasticsearchDataSource
 
 
 class VerificationStatus:
-    RAISED = "RAISED"
+    RAISED = 1
 
 
 class ContinuousVerification:
@@ -65,6 +65,7 @@ class ContinuousVerification:
         output['baseline_tags'] = baseline_tags
         output['candidate_tags'] = candidate_tags
         output['status'] = VerificationStatus.RAISED
+        output['severity'] = math.ceil((output['risk'] + 0.01)/34)
         self.es.es.index(private_key + "_verifications", output)
         return output
 
@@ -314,6 +315,10 @@ def transform_html(df):
                                   x[['count_baseline', 'count_candidate', 'change_perc', 'level',
                                      'semantics']].itertuples(index=False)],
             risk_description=lambda x: [get_risk(b, c, p, l, s)[0] for b, c, p, l, s in
+                                        x[['count_baseline', 'count_candidate', 'change_perc',
+                                           'level',
+                                           'semantics']].itertuples(index=False)],
+            risk_severity=lambda x: [math.ceil((get_risk(b, c, p, l, s)[1]+0.01)/34) for b, c, p, l, s in
                                         x[['count_baseline', 'count_candidate', 'change_perc',
                                            'level',
                                            'semantics']].itertuples(index=False)],
