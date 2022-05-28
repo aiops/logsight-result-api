@@ -66,7 +66,8 @@ class ContinuousVerification:
         output['candidate_tags'] = candidate_tags
         output['status'] = VerificationStatus.RAISED
         output['severity'] = math.ceil((output['risk'] + 0.01)/34)
-        self.es.es.index(private_key + "_verifications", output)
+        resp = self.es.es.index(private_key + "_verifications", output)
+        output['compareId'] = resp['_id']
         return output
 
 
