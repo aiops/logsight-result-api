@@ -2,7 +2,7 @@ import datetime
 import logging
 import math
 import os
-from enum import Enum
+import time
 
 import numpy as np
 import pandas as pd
@@ -13,7 +13,10 @@ from .es_query import ElasticsearchDataSource
 
 
 class VerificationStatus:
-    RAISED = "RAISED"
+    RAISED = 1
+
+
+FAILURE_THRESHOLD = 80
 
 
 class ContinuousVerification:
@@ -53,6 +56,7 @@ class ContinuousVerification:
             return None, None
 
     def run_verification(self, private_key="", baseline_tags=None, candidate_tags=None):
+        start_time = time.time()
         if candidate_tags is None:
             candidate_tags = {}
         if baseline_tags is None:
@@ -64,8 +68,15 @@ class ContinuousVerification:
         output['timestamp'] = datetime.datetime.utcnow().isoformat()
         output['baseline_tags'] = baseline_tags
         output['candidate_tags'] = candidate_tags
+        output['tag_keys'] = list(baseline_tags.keys())
+        output['tags'] = baseline_tags
         output['status'] = VerificationStatus.RAISED
-        self.es.es.index(private_key + "_verifications", output)
+        output['severity'] = math.ceil((output['risk'] + 0.01) / 34)
+        output['velocity'] = time.time() - start_time
+        output['is_failure'] = int(output['risk'] >= FAILURE_THRESHOLD)
+        resp = self.es.es.index(private_key + "_verifications", output)
+        output['compareId'] = resp['_id']
+
         return output
 
 
@@ -154,22 +165,22 @@ def transform_html(df):
                 return 0
 
         risk_tbl = [(0, 1, 0, 0, "Added state", 0, "fa fa-plus-circle font-medium-1"),
-                    (0, 1, 1, 0, "Added state (E)", 70, "fa fa-exclamation-triangle font-medium-1"),
-                    (0, 1, 0, 1, "Added state (F)", 60, "fa fa-exclamation-triangle font-medium-1"),
-                    (0, 1, 1, 1, "Added state (E/F)", 80, "fa fa-exclamation-triangle font-medium-1"),
+                    (0, 1, 1, 0, "Added state", 70, "fa fa-exclamation-triangle font-medium-1"),
+                    (0, 1, 0, 1, "Added state", 60, "fa fa-exclamation-triangle font-medium-1"),
+                    (0, 1, 1, 1, "Added state", 80, "fa fa-exclamation-triangle font-medium-1"),
                     (1, 0, 0, 0, "Deleted state", 0, "fa fa-minus-circle font-medium-1"),
-                    (1, 0, 1, 0, "Deleted state (E)", 0, "fa fa-minus-circle font-medium-1"),
-                    (1, 0, 0, 1, "Deleted state (F)", 0, "fa fa-minus-circle font-medium-1"),
-                    (1, 0, 1, 1, "Deleted state (E/F)", 0, "fa fa-minus-circle font-medium-1"),
+                    (1, 0, 1, 0, "Deleted state", 0, "fa fa-minus-circle font-medium-1"),
+                    (1, 0, 0, 1, "Deleted state", 0, "fa fa-minus-circle font-medium-1"),
+                    (1, 0, 1, 1, "Deleted state", 0, "fa fa-minus-circle font-medium-1"),
                     (1, 1, 0, 0, "Recurring state", 0, "fa fa-check-circle font-medium-1"),
-                    (1, 1, 1, 0, "Recurring state (E)", 25, "fa fa-exclamation-circle font-medium-1"),
-                    (1, 1, 0, 1, "Recurring state (F)", 25, "fa fa-exclamation-circle font-medium-1"),
-                    (1, 1, 1, 1, "Recurring state (E/F)", 50, "fa fa-exclamation-circle font-medium-1")
+                    (1, 1, 1, 0, "Recurring state", 25, "fa fa-exclamation-circle font-medium-1"),
+                    (1, 1, 0, 1, "Recurring state", 25, "fa fa-exclamation-circle font-medium-1"),
+                    (1, 1, 1, 1, "Recurring state", 50, "fa fa-exclamation-circle font-medium-1")
                     ]
 
         # REVISIT THIS
 
-        r = ("Internal error", 100)
+        r = ("Internal error", 100, "")
         for rule in risk_tbl:
             if rule[0] == min(baseline_count, 1) and rule[1] == min(candidate_count, 1) \
                     and rule[2] == level_as_binary(level) and rule[3] == risk_as_binary(semantics):
@@ -317,7 +328,11 @@ def transform_html(df):
                                         x[['count_baseline', 'count_candidate', 'change_perc',
                                            'level',
                                            'semantics']].itertuples(index=False)],
-            risk_symbol=lambda x: [get_risk(b, c, p, l, s)[2] for b, c, p, l, s in
+            risk_severity=lambda x: [math.ceil((get_risk(b, c, p, l, s)[1] + 0.01) / 34) for b, c, p, l, s in
+                                     x[['count_baseline', 'count_candidate', 'change_perc',
+                                        'level',
+                                        'semantics']].itertuples(index=False)],
+            risk_symbol=lambda x: [get_risk(b, c, p, l, s)[1] for b, c, p, l, s in
                                    x[['count_baseline', 'count_candidate', 'change_perc', 'level',
                                       'semantics']].itertuples(index=False)],
             risk_color=lambda x: x['risk_score'].map(
