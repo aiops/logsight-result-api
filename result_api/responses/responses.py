@@ -4,15 +4,14 @@ from pydantic import BaseModel
 
 
 class Response(BaseModel):
-    app_id: str
     message: str
 
 
 class ErrorResponse(Response):
-    def __init__(self, id, message):
-        super(ErrorResponse, self).__init__(app_id=id, message=message)
+    def __init__(self, message):
+        super(ErrorResponse, self).__init__(message=message)
 
 
 class SuccessResponse(Response):
-    def __init__(self, id, message):
-        super(SuccessResponse, self).__init__(app_id=id, message=message)
+    def __init__(self, message):
+        super(SuccessResponse, self).__init__(message=message)
