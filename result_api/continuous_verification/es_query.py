@@ -22,7 +22,7 @@ class ElasticsearchDataSource:
                                      body={"index": {
                                          "max_result_window": 500000
                                      }})
-        index = f"{private_key}_*"
+        index = f"{private_key}*_pipeline"
         filter_query = []
         for tag_key in tags:
             filter_query.append({"match_phrase": {f"tags.{tag_key}.keyword": tags[tag_key]}})
