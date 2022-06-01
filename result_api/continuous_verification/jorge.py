@@ -62,6 +62,8 @@ class ContinuousVerification:
         if baseline_tags is None:
             baseline_tags = {}
         df_baseline, df_candidate = self.extract_data(private_key, baseline_tags, candidate_tags)
+        if (df_baseline is None) or (df_candidate is None):
+            return None
         df_etl = transform_etl(df_baseline, df_candidate)
         df_html = transform_html(df_etl)
         output = prepare_html(df_html)
