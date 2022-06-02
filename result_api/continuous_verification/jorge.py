@@ -16,7 +16,23 @@ class VerificationStatus:
     RAISED = 1
 
 
-FAILURE_THRESHOLD = 80
+RISK_SCORE_ADDED_STATE_LEVEL_INFO_SEMANTICS_REPORT = 0
+RISK_SCORE_ADDED_STATE_LEVEL_ERROR_SEMANTICS_REPORT = 70
+RISK_SCORE_ADDED_STATE_LEVEL_INFO_SEMANTICS_FAULT = 60
+RISK_SCORE_ADDED_STATE_LEVEL_ERROR_SEMANTICS_FAULT = 80
+
+RISK_SCORE_DELETED_STATE_LEVEL_INFO_SEMANTICS_REPORT = 0
+RISK_SCORE_DELETED_STATE_LEVEL_ERROR_SEMANTICS_REPORT = 0
+RISK_SCORE_DELETED_STATE_LEVEL_INFO_SEMANTICS_FAULT = 0
+RISK_SCORE_DELETED_STATE_LEVEL_ERROR_SEMANTICS_FAULT = 0
+
+RISK_SCORE_RECURRING_STATE_LEVEL_INFO_SEMANTICS_REPORT = 0
+RISK_SCORE_RECURRING_STATE_LEVEL_ERROR_SEMANTICS_REPORT = 25
+RISK_SCORE_RECURRING_STATE_LEVEL_INFO_SEMANTICS_FAULT = 25
+RISK_SCORE_RECURRING_STATE_LEVEL_ERROR_SEMANTICS_FAULT = 50
+
+
+VERIFICATION_RISK_THRESHOLD = 80
 
 
 class ContinuousVerification:
@@ -75,7 +91,7 @@ class ContinuousVerification:
         output['status'] = VerificationStatus.RAISED
         output['severity'] = math.ceil((output['risk'] + 0.01) / 34)
         output['velocity'] = time.time() - start_time
-        output['is_failure'] = int(output['risk'] >= FAILURE_THRESHOLD)
+        output['is_failure'] = int(output['risk'] >= VERIFICATION_RISK_THRESHOLD)
         resp = self.es.es.index(private_key + "_verifications", output)
         output['compareId'] = resp['_id']
 
@@ -166,18 +182,18 @@ def transform_html(df):
             else:
                 return 0
 
-        risk_tbl = [(0, 1, 0, 0, "Added state", 0, "fa fa-plus-circle font-medium-1"),
-                    (0, 1, 1, 0, "Added state", 70, "fa fa-exclamation-triangle font-medium-1"),
-                    (0, 1, 0, 1, "Added state", 60, "fa fa-exclamation-triangle font-medium-1"),
-                    (0, 1, 1, 1, "Added state", 80, "fa fa-exclamation-triangle font-medium-1"),
-                    (1, 0, 0, 0, "Deleted state", 0, "fa fa-minus-circle font-medium-1"),
-                    (1, 0, 1, 0, "Deleted state", 0, "fa fa-minus-circle font-medium-1"),
-                    (1, 0, 0, 1, "Deleted state", 0, "fa fa-minus-circle font-medium-1"),
-                    (1, 0, 1, 1, "Deleted state", 0, "fa fa-minus-circle font-medium-1"),
-                    (1, 1, 0, 0, "Recurring state", 0, "fa fa-check-circle font-medium-1"),
-                    (1, 1, 1, 0, "Recurring state", 25, "fa fa-exclamation-circle font-medium-1"),
-                    (1, 1, 0, 1, "Recurring state", 25, "fa fa-exclamation-circle font-medium-1"),
-                    (1, 1, 1, 1, "Recurring state", 50, "fa fa-exclamation-circle font-medium-1")
+        risk_tbl = [(0, 1, 0, 0, "Added state", RISK_SCORE_ADDED_STATE_LEVEL_INFO_SEMANTICS_REPORT, "fa fa-plus-circle font-medium-1"),
+                    (0, 1, 1, 0, "Added state", RISK_SCORE_ADDED_STATE_LEVEL_ERROR_SEMANTICS_REPORT, "fa fa-exclamation-triangle font-medium-1"),
+                    (0, 1, 0, 1, "Added state", RISK_SCORE_ADDED_STATE_LEVEL_INFO_SEMANTICS_FAULT, "fa fa-exclamation-triangle font-medium-1"),
+                    (0, 1, 1, 1, "Added state", RISK_SCORE_ADDED_STATE_LEVEL_ERROR_SEMANTICS_FAULT, "fa fa-exclamation-triangle font-medium-1"),
+                    (1, 0, 0, 0, "Deleted state", RISK_SCORE_DELETED_STATE_LEVEL_INFO_SEMANTICS_REPORT, "fa fa-minus-circle font-medium-1"),
+                    (1, 0, 1, 0, "Deleted state", RISK_SCORE_DELETED_STATE_LEVEL_ERROR_SEMANTICS_REPORT, "fa fa-minus-circle font-medium-1"),
+                    (1, 0, 0, 1, "Deleted state", RISK_SCORE_DELETED_STATE_LEVEL_INFO_SEMANTICS_FAULT, "fa fa-minus-circle font-medium-1"),
+                    (1, 0, 1, 1, "Deleted state", RISK_SCORE_DELETED_STATE_LEVEL_ERROR_SEMANTICS_FAULT, "fa fa-minus-circle font-medium-1"),
+                    (1, 1, 0, 0, "Recurring state", RISK_SCORE_RECURRING_STATE_LEVEL_INFO_SEMANTICS_REPORT, "fa fa-check-circle font-medium-1"),
+                    (1, 1, 1, 0, "Recurring state", RISK_SCORE_RECURRING_STATE_LEVEL_ERROR_SEMANTICS_REPORT, "fa fa-exclamation-circle font-medium-1"),
+                    (1, 1, 0, 1, "Recurring state", RISK_SCORE_RECURRING_STATE_LEVEL_INFO_SEMANTICS_FAULT, "fa fa-exclamation-circle font-medium-1"),
+                    (1, 1, 1, 1, "Recurring state", RISK_SCORE_RECURRING_STATE_LEVEL_ERROR_SEMANTICS_FAULT, "fa fa-exclamation-circle font-medium-1")
                     ]
 
         # REVISIT THIS
