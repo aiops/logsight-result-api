@@ -1,9 +1,9 @@
+from typing import Dict
+
 from pydantic import BaseModel
 
 
 class VerificationDTO(BaseModel):
-    applicationId: str
-    applicationName: str
-    baselineTag: str
+    baselineTags: str
     privateKey: str
-    compareTag: str
+    candidateTags: str

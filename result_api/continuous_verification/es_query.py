@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import Dict
 
 from elasticsearch import Elasticsearch
 
@@ -16,19 +17,27 @@ class ElasticsearchDataSource:
             retry_on_timeout=True
         )
 
-    def get_log_ad_data(self, private_key: str, app: str, tag: str):
+    def get_log_ad_data(self, private_key: str, tags: Dict[str, str]):
         self.es.indices.put_settings(index="_all",
-            body={"index": {
-                "max_result_window": 500000
-            }})
-        index = f"{private_key}_{app}_log_ad"
+                                     body={"index": {
+                                         "max_result_window": 500000
+                                     }})
+        index = f"{private_key}*_pipeline"
+        filter_query = []
+        for tag_key in tags:
+            filter_query.append({"match_phrase": {f"tags.{tag_key}.keyword": tags[tag_key]}})
         res = self.es.search(
             index=index,
             doc_type='_doc',
             body={
                 "size": os.environ.get("ES_QUERY_SIZE", 10000),
                 "query": {
-                    "match": {"tag": tag}
+                    "bool": {
+                        "must": [],
+                        "filter": filter_query,
+                        "should": [],
+                        "must_not": []
+                    }
                 }
             }
         )
