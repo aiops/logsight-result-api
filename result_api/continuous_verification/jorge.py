@@ -76,7 +76,7 @@ class ContinuousVerification:
         output['severity'] = math.ceil((output['risk'] + 0.01) / 34)
         output['velocity'] = time.time() - start_time
         output['is_failure'] = int(output['risk'] >= VERIFICATION_RISK_THRESHOLD)
-        resp = self.es.es.index(private_key + "_verifications", output)
+        resp = self.es.es.index(index=private_key + "_verifications", body=output)
         output['compareId'] = resp['_id']
 
         return output
