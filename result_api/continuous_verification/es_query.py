@@ -10,7 +10,7 @@ class ElasticsearchDataSource:
     def __init__(self, host, port, username, password):
         print(f"Connecting to {host}:{port} as user {username}")
         self.es = Elasticsearch(
-            [{'host': host, 'port': port}],
+            [{'scheme': 'http', 'host': host, 'port': int(port)}],
             http_auth=(username, password),
             timeout=30,
             max_retries=5,
@@ -28,7 +28,6 @@ class ElasticsearchDataSource:
             filter_query.append({"match_phrase": {f"tags.{tag_key}.keyword": tags[tag_key]}})
         res = self.es.search(
             index=index,
-            doc_type='_doc',
             body={
                 "size": os.environ.get("ES_QUERY_SIZE", 10000),
                 "query": {
