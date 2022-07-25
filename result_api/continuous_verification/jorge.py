@@ -64,6 +64,14 @@ class ContinuousVerification:
         df_baseline, df_candidate = self.extract_data(private_key, baseline_tags, candidate_tags)
         if (df_baseline is None) or (df_candidate is None):
             return None
+
+        time_delta_df_baseline = df_baseline.index[-1] - df_baseline.index[0]
+        time_delta_df_candidate = df_candidate.index[-1] - df_candidate.index[0]
+        if time_delta_df_candidate < time_delta_df_baseline:
+            df_baseline = df_baseline.loc[df_baseline.index[0]:(df_baseline.index[0] + time_delta_df_candidate)]
+        else:
+            df_candidate = df_candidate.loc[df_candidate.index[0]:(df_candidate.index[0] + time_delta_df_baseline)]
+
         df_etl = transform_etl(df_baseline, df_candidate)
         df_html = transform_html(df_etl)
         output = prepare_html(df_html)

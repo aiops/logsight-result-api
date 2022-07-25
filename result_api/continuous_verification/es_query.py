@@ -18,17 +18,25 @@ class ElasticsearchDataSource:
         )
 
     def get_log_ad_data(self, private_key: str, tags: Dict[str, str]):
-        self.es.indices.put_settings(index="_all",
+        index = f"{private_key}*_pipeline"
+        self.es.indices.put_settings(index=index,
                                      body={"index": {
                                          "max_result_window": 500000
                                      }})
-        index = f"{private_key}*_pipeline"
         filter_query = []
         for tag_key in tags:
             filter_query.append({"match_phrase": {f"tags.{tag_key}.keyword": tags[tag_key]}})
         res = self.es.search(
             index=index,
             body={
+                "sort": [
+                    {
+                        "timestamp": {
+                            "order": "asc",
+                            "unmapped_type": "boolean"
+                        }
+                    }
+                ],
                 "size": os.environ.get("ES_QUERY_SIZE", 10000),
                 "query": {
                     "bool": {
