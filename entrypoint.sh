@@ -15,4 +15,4 @@ check_license() {
 }
 
 check_license
-python3 -u "${LOGSIGHT_HOME}/result_server.py"
+uvicorn result_server:app --app-dir "${LOGSIGHT_HOME}"

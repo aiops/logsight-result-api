@@ -1,9 +1,9 @@
-from typing import Dict
+from typing import Dict, Union
 
 from pydantic import BaseModel
 
 
 class VerificationDTO(BaseModel):
-    baselineTags: str
+    baselineTags: Union[str, Dict[str, str]]
     privateKey: str
-    candidateTags: str
+    candidateTags: Union[str, Dict[str, str]]
