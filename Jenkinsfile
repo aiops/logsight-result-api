@@ -16,7 +16,7 @@ pipeline {
             }
             steps {
                 sh 'pip install -r requirements.txt'
-                sh 'PYTHONPATH=$PWD/result_api py.test --junitxml test-report.xml --cov-report xml:coverage-report.xml --cov=result_api tests/unit'
+                sh 'PYTHONPATH=$PWD/result_api py.test --junitxml test-report.xml --cov-report xml:coverage-report.xml --cov=result_api tests/'
                 stash name: 'test-reports', includes: '*.xml' 
             }
             post {
