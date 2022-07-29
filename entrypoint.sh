@@ -15,4 +15,4 @@ check_license() {
 }
 
 check_license
-uvicorn result_server:app --app-dir "${LOGSIGHT_HOME}"
+cd "${LOGSIGHT_HOME}" && hypercorn server:app -b 0.0.0.0:5554

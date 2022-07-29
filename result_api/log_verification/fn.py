@@ -1,4 +1,5 @@
-from logsight.analytics_core.modules.log_statistics.count import TemplateStatistics
+from logsight.analytics_core.modules.log_statistics.template_stats \
+    import TemplateStatistics
 from logsight.analytics_core.modules.risk_analysis.risk_analysis import RiskAnalysis
 from result_api.log_verification.group_stats import calculate_state_stats, calculate_total_messages, \
     count_template_stats, \

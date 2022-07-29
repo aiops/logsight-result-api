@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from dto import VerificationDTO
-from log_verification.verification import LogVerification
+from result_api.dto import VerificationDTO
+from result_api.log_verification.verification import LogVerification
 from logsight.services.service_provider import ServiceProvider
 
 app = FastAPI()
