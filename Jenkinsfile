@@ -5,6 +5,7 @@ pipeline {
         DOCKER = credentials('dockerhub')
         DOCKER_REPO = "logsight/logsight-result-api"
         SONAR_PROJECT_KEY = "aiops_logsight-result-api"
+        DOCKER_BUILDKIT='1'
     }
 
     stages {
