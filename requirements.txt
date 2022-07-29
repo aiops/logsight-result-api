@@ -16,3 +16,4 @@ onnxruntime==1.10.0
 config
 fastapi
 hypercorn
+pytest-cov
