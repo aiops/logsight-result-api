@@ -3,6 +3,9 @@
 # set base image (host OS)
 FROM python:3.8-slim
 
+ARG GITHUB_TOKEN
+ARG LOGSIGHT_LIB_VERSION
+
 RUN apt-get update && \
     apt-get -y install --no-install-recommends libc-bin openssh-client git-lfs && \
     rm -r /var/lib/apt/lists/*

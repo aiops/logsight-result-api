@@ -7,7 +7,7 @@ zmq
 pyzmq
 kafka-python
 cachetools
-numpy
+numpy>=1.22.0
 nltk
 sqlalchemy
 setuptools
@@ -17,3 +17,4 @@ config
 fastapi
 hypercorn
 pytest-cov
+gitpython
