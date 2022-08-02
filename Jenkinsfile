@@ -18,6 +18,7 @@ pipeline {
             }
             steps {
                 sh 'pip install -r requirements.txt'
+                sh 'apt-get update && apt-get install -y git-lfs'
                 sh 'pip install "git+https://$GITHUB_TOKEN@github.com/aiops/logsight.git@$LOGSIGHT_LIB_VERSION"'
                 sh 'PYTHONPATH=$PWD/result_api py.test --junitxml test-report.xml --cov-report xml:coverage-report.xml --cov=result_api tests/'
                 stash name: 'test-reports', includes: '*.xml' 
