@@ -20,8 +20,8 @@ COPY requirements.txt .
 # install dependencies
 RUN pip install -r requirements.txt
 
-RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
-RUN --mount=type=ssh pip install git+ssh://git@github.com/aiops/logsight.git@lib#egg=logsight
+RUN pip install "git+https://$GITHUB_TOKEN@github.com/aiops/logsight.git@$LOGSIGHT_LIB_VERSION"
+
 
 # copy code
 COPY result_api/ result_api
