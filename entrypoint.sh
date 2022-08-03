@@ -15,4 +15,4 @@ check_license() {
 }
 
 check_license
-python3 -u "${LOGSIGHT_HOME}/result_server.py"
+cd "${LOGSIGHT_HOME}" && hypercorn server:app -b 0.0.0.0:5554
