@@ -7,7 +7,7 @@ ARG GITHUB_TOKEN
 ARG LOGSIGHT_LIB_VERSION
 
 RUN apt-get update && \
-    apt-get -y install --no-install-recommends libc-bin openssh-client git-lfs && \
+    apt-get -y install --no-install-recommends git-lfs && \
     rm -r /var/lib/apt/lists/*
 
 ENV LDFLAGS="-L/usr/lib/x86_64-linux-gnu"

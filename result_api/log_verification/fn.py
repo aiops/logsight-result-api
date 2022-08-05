@@ -71,6 +71,7 @@ def calculate_individual_stats(merged):
         axis=1)
     merged['percentage_candidate'] = 100 - merged['percentage_baseline']
     ra = RiskAnalysis()
+    print(ra.calculate_verification_risk('added',1,'info'))
     merged['risk_score'] = merged.apply(
         lambda row: ra.calculate_verification_risk(row['state'], row['predicted_anomaly'], row['level']),
         axis=1)

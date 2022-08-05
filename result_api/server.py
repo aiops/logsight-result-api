@@ -1,3 +1,5 @@
+import logging.config
+
 from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -5,8 +7,13 @@ from fastapi.responses import JSONResponse
 from result_api.dto import VerificationDTO
 from result_api.log_verification.verification import LogVerification
 from logsight.services.service_provider import ServiceProvider
+from logsight.logger.configuration import LogConfig
 
 app = FastAPI()
+
+
+logging.config.dictConfig(LogConfig().config)
+logger = logging.getLogger('logsight')
 
 
 @app.post('/api/v1/compare')

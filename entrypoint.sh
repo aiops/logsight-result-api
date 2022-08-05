@@ -15,4 +15,4 @@ check_license() {
 }
 
 check_license
-cd "${LOGSIGHT_HOME}" && hypercorn server:app -b 0.0.0.0:5554
+  cd "${LOGSIGHT_HOME}" && hypercorn server:app -b 0.0.0.0:5554
