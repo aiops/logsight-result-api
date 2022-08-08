@@ -1,7 +1,7 @@
 # docker build -t logsight/logsight-result-api .
 
 # set base image (host OS)
-FROM python:3.8-slim
+FROM python:3.8
 
 ARG GITHUB_TOKEN
 ARG LOGSIGHT_LIB_VERSION
