@@ -67,10 +67,20 @@ class ContinuousVerification:
 
         time_delta_df_baseline = df_baseline.index[-1] - df_baseline.index[0]
         time_delta_df_candidate = df_candidate.index[-1] - df_candidate.index[0]
-        if time_delta_df_candidate < time_delta_df_baseline:
-            df_baseline = df_baseline.loc[df_baseline.index[0]:(df_baseline.index[0] + time_delta_df_candidate)]
-        else:
-            df_candidate = df_candidate.loc[df_candidate.index[0]:(df_candidate.index[0] + time_delta_df_baseline)]
+
+        try:
+            if time_delta_df_candidate < time_delta_df_baseline:
+                df_baseline = df_baseline.loc[(df_baseline.index >= df_baseline.index[0]) & (
+                            df_baseline.index < (df_baseline.index[0] + time_delta_df_candidate))]
+            else:
+                df_candidate = df_candidate.loc[df_candidate.index >= df_candidate.index[0] & (
+                            df_candidate.index < (df_candidate.index[0] + time_delta_df_baseline))]
+        except Exception as e:
+            logging.error(e)
+            if len(df_baseline.index) < len(df_candidate.index):
+                df_candidate = df_candidate[:len(df_baseline)]
+            else:
+                df_baseline = df_baseline[:len(df_candidate)]
 
         df_etl = transform_etl(df_baseline, df_candidate)
         df_html = transform_html(df_etl)
