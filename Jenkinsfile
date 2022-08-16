@@ -5,7 +5,7 @@ pipeline {
         DOCKER = credentials('dockerhub')
         DOCKER_REPO = "logsight/logsight-result-api"
         SONAR_PROJECT_KEY = "aiops_logsight-result-api"
-        LOGSIGHT_LIB_VERSION = "lib"
+        LOGSIGHT_LIB_VERSION = "v1.3.0"
         GITHUB_TOKEN = credentials('github-pat-jenkins')
     }
 
@@ -44,6 +44,7 @@ pipeline {
                             withSonarQubeEnv('logsight-sonarqube') {
                                 sh """ 
                                     sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.branch.name=$BRANCH_NAME \
+                                        -Dsonar.python.version=3 \
                                         -Dsonar.organization=logsight \
                                         -Dsonar.sources=result_api -Dsonar.tests=tests/. \
                                         -Dsonar.inclusions="**/*.py" \
