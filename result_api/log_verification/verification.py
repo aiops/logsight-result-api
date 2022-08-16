@@ -1,4 +1,5 @@
 import json
+import logging
 import math
 from datetime import datetime
 import time
@@ -11,6 +12,8 @@ from result_api.log_verification.fn import calculate_compare_stats
 from logsight.services import ElasticsearchService
 
 PIPELINE_INDEX_EXT = LogsightProperties().pipeline_index_ext
+
+logger = logging.getLogger("logsight." + __name__)
 
 
 class LogVerification:
@@ -48,6 +51,23 @@ class LogVerification:
 
         df_baseline = self.extract_data_for_tag(private_key, baseline_tags)
         df_candidate = self.extract_data_for_tag(private_key, candidate_tags)
+
+        time_delta_df_baseline = df_baseline.index[-1] - df_baseline.index[0]
+        time_delta_df_candidate = df_candidate.index[-1] - df_candidate.index[0]
+
+        try:
+            if time_delta_df_candidate < time_delta_df_baseline:
+                df_baseline = df_baseline.loc[(df_baseline.index >= df_baseline.index[0]) & (
+                            df_baseline.index < (df_baseline.index[0] + time_delta_df_candidate))]
+            else:
+                df_candidate = df_candidate.loc[df_candidate.index >= df_candidate.index[0] & (
+                            df_candidate.index < (df_candidate.index[0] + time_delta_df_baseline))]
+        except Exception as e:
+            logger.error(e)
+            if len(df_baseline.index) < len(df_candidate.index):
+                df_candidate = df_candidate[:len(df_baseline)]
+            else:
+                df_baseline = df_baseline[:len(df_candidate)]
 
         output = calculate_compare_stats(df_baseline, df_candidate)
 
