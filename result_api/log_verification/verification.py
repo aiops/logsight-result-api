@@ -5,6 +5,7 @@ from datetime import datetime
 import time
 
 import pandas as pd
+from elasticsearch import NotFoundError
 
 from logsight.configs.properties import LogsightProperties
 from result_api.configs.properties import ResultApiConfig
@@ -14,6 +15,10 @@ from logsight.services import ElasticsearchService
 PIPELINE_INDEX_EXT = LogsightProperties().pipeline_index_ext
 
 logger = logging.getLogger("logsight." + __name__)
+
+
+class NotFoundException(Exception):
+    pass
 
 
 class LogVerification:
@@ -34,9 +39,10 @@ class LogVerification:
                 break
             latest_ingest_time = result[-1]['ingest_timestamp']
 
-        logs_df = pd.DataFrame(logs).set_index('timestamp')
-        logs_df.index = pd.to_datetime(logs_df.index)
-        return logs_df[['level', 'template', 'tags', 'prediction']]
+        if len(logs) > 0:
+            logs_df = pd.DataFrame(logs).set_index('timestamp')
+            logs_df.index = pd.to_datetime(logs_df.index)
+            return logs_df[['level', 'template', 'tags', 'prediction']]
 
     def run_verification(self, private_key, baseline_tags, candidate_tags):
         start_time = time.time()
@@ -49,19 +55,23 @@ class LogVerification:
         if isinstance(candidate_tags, str):
             candidate_tags = json.loads(candidate_tags)
 
-        df_baseline = self.extract_data_for_tag(private_key, baseline_tags)
-        df_candidate = self.extract_data_for_tag(private_key, candidate_tags)
-
+        try:
+            df_baseline = self.extract_data_for_tag(private_key, baseline_tags)
+            df_candidate = self.extract_data_for_tag(private_key, candidate_tags)
+        except NotFoundError as e:
+            raise NotFoundException(e.body['error']['reason'])
+        if df_candidate is None or df_baseline is None:
+            raise NotFoundException("Data index does not exists, or empty. Try again later.")
         time_delta_df_baseline = df_baseline.index[-1] - df_baseline.index[0]
         time_delta_df_candidate = df_candidate.index[-1] - df_candidate.index[0]
 
         try:
             if time_delta_df_candidate < time_delta_df_baseline:
                 df_baseline = df_baseline.loc[(df_baseline.index >= df_baseline.index[0]) & (
-                            df_baseline.index < (df_baseline.index[0] + time_delta_df_candidate))]
+                        df_baseline.index < (df_baseline.index[0] + time_delta_df_candidate))]
             else:
                 df_candidate = df_candidate.loc[df_candidate.index >= df_candidate.index[0] & (
-                            df_candidate.index < (df_candidate.index[0] + time_delta_df_baseline))]
+                        df_candidate.index < (df_candidate.index[0] + time_delta_df_baseline))]
         except Exception as e:
             logger.error(e)
             if len(df_baseline.index) < len(df_candidate.index):
