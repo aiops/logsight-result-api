@@ -1,7 +1,7 @@
 import json
 import logging
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 
 import pandas as pd
@@ -62,15 +62,14 @@ class LogVerification:
             raise NotFoundException(e.body['error']['reason'])
         if df_candidate is None or df_baseline is None:
             raise NotFoundException("Data index does not exists, or empty. Try again later.")
-        time_delta_df_baseline = df_baseline.index[-1] - df_baseline.index[0]
-        time_delta_df_candidate = df_candidate.index[-1] - df_candidate.index[0]
-
+        time_delta_df_baseline = df_baseline.index[-1] - df_baseline.index[0] + timedelta(minutes=3)
+        time_delta_df_candidate = df_candidate.index[-1] - df_candidate.index[0] + timedelta(minutes=3)
         try:
             if time_delta_df_candidate < time_delta_df_baseline:
                 df_baseline = df_baseline.loc[(df_baseline.index >= df_baseline.index[0]) & (
                         df_baseline.index < (df_baseline.index[0] + time_delta_df_candidate))]
             else:
-                df_candidate = df_candidate.loc[df_candidate.index >= df_candidate.index[0] & (
+                df_candidate = df_candidate.loc[(df_candidate.index >= df_candidate.index[0]) & (
                         df_candidate.index < (df_candidate.index[0] + time_delta_df_baseline))]
         except Exception as e:
             logger.error(e)
