@@ -88,6 +88,7 @@ class LogVerification:
         output['severity'] = math.ceil((output['risk'] + 0.01) / 34)
         output['velocity'] = time.time() - start_time
         output['is_failure'] = int(output['risk'] >= self.th)
+        output['status'] = 1
         resp = self.es_service.parallel_bulk(output, private_key + "_verifications")
         output['compareId'] = resp['index']['_id']
 
