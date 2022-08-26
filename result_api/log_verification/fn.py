@@ -5,7 +5,7 @@ from result_api.log_verification.group_stats import calculate_state_stats, calcu
     count_template_stats, \
     frequency_statistics, risk_statistics
 from result_api.log_verification.helpers import merge_template_stats
-from result_api.log_verification.lambdas import calculate_state, get_change_perc, get_percentage
+from result_api.log_verification.lambdas import calculate_state, get_change_perc, get_percentage, get_code_link
 
 
 def calculate_compare_stats(baseline, candidate):
@@ -22,9 +22,9 @@ def calculate_compare_stats(baseline, candidate):
     # grouped state stats
 
     group_stats = calculate_group_stats(merged)
-    merged = merged[['risk_score', 'state', 'percentage_baseline', 'percentage_candidate', 'template', 'count_baseline',
-                     'count_candidate', 'freq_change', 'coverage_baseline', 'coverage_candidate', 'level',
-                     'predicted_anomaly']]
+    merged = merged[['risk_score', 'state', 'percentage_baseline', 'percentage_candidate', 'template', 'code_location',
+                     'count_baseline', 'count_candidate', 'freq_change', 'coverage_baseline', 'coverage_candidate',
+                     'level', 'predicted_anomaly']]
 
     group_stats['rows'] = merged.to_dict(orient='records')
     return group_stats
@@ -74,4 +74,5 @@ def calculate_individual_stats(merged):
     merged['risk_score'] = merged.apply(
         lambda row: ra.calculate_verification_risk(row['state'], row['predicted_anomaly'], row['level']),
         axis=1)
+    merged['code_location'] = merged.apply(lambda row: get_code_link(row['template_candidate']), axis=1)
     return merged
