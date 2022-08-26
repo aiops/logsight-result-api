@@ -44,7 +44,7 @@ def get_change_perc(baseline, target):
 
 
 def get_code_link(template):
-    if "Unable to parse authorisation packet" in template:
+    if "Unable to parse authorisation packet" in str(template):
         return "https://github.com/aiops/sockshop-demo/blob/main/orders/src/main/java/works/weave/socks/orders" \
                "/controllers/OrdersController.java#L93"
     else:
