@@ -47,5 +47,17 @@ def get_code_link(template):
     if "Unable to parse authorisation packet" in str(template):
         return "https://github.com/aiops/sockshop-demo/blob/main/orders/src/main/java/works/weave/socks/orders" \
                "/controllers/OrdersController.java#L93"
+    elif "category_item = choice(catalogue)" in str(template):
+        return "https://github.com/aiops/sockshop-demo/blob/main/load-test/locustfile.py#L14"
+    elif "self.execute_next_task()" in str(template):
+        return "https://github.com/aiops/sockshop-demo/blob/main/load-test/locustfile.py#L14"
+    elif 'self.execute_task(task["callable"], *task["args"], **task["kwargs"])' in str(template):
+        return "https://github.com/aiops/sockshop-demo/blob/main/load-test/locustfile.py#L14"
+    elif "return seq[int(self.random() * len(seq))] # raises IndexError if seq is empty" in str(template):
+        return "https://github.com/aiops/sockshop-demo/blob/main/load-test/locustfile.py#L14"
+    elif "in choice" in str(template):
+        return "https://github.com/aiops/sockshop-demo/blob/main/load-test/locustfile.py#L14"
+    elif "exited: stopped" in str(template):
+        return "https://github.com/aiops/sockshop-demo/blob/main/load-test/locustfile.py#L14"
     else:
         return ""
