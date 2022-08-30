@@ -58,8 +58,6 @@ def get_code_link(template):
         return "https://github.com/aiops/sockshop-demo/blob/release_version_2.1.0/load-test/locustfile.py#L14"
     elif "exited: stopped" in str(template):
         return "https://github.com/aiops/sockshop-demo/blob/release_version_2.1.0/load-test/locustfile.py#L14"
-    elif "exited: stopped" in str(template):
-        return "https://github.com/aiops/sockshop-demo/blob/release_version_2.1.0/load-test/locustfile.py#L14"
     elif "Received payment response" in str(template):
         return "https://github.com/aiops/sockshop-demo/pull/20/files#diff-d85b981bd02613bc06ceaebfbcc2e1b6996208e2e17cf3adeb1db7d7ae1f6032L91"
     else:
