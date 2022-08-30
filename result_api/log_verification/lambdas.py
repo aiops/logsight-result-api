@@ -45,7 +45,27 @@ def get_change_perc(baseline, target):
 
 def get_code_link(template):
     if "Unable to parse authorisation packet" in str(template):
-        return "https://github.com/aiops/sockshop-demo/blob/main/orders/src/main/java/works/weave/socks/orders" \
-               "/controllers/OrdersController.java#L93"
+        return "https://github.com/aiops/sockshop-demo/pull/20/files#diff-d85b981bd02613bc06ceaebfbcc2e1b6996208e2e17cf3adeb1db7d7ae1f6032L92"
+    elif "category_item = choice(catalogue)" in str(template):
+        return "https://github.com/aiops/sockshop-demo/blob/release_version_2.1.0/load-test/locustfile.py#L14"
+    elif "self.execute_next_task()" in str(template):
+        return "https://github.com/aiops/sockshop-demo/blob/release_version_2.1.0/load-test/locustfile.py#L14"
+    elif 'self.execute_task(task["callable"], *task["args"], **task["kwargs"])' in str(template):
+        return "https://github.com/aiops/sockshop-demo/blob/release_version_2.1.0/load-test/locustfile.py#L14"
+    elif "return seq[int(self.random() * len(seq))] # raises IndexError if seq is empty" in str(template):
+        return "https://github.com/aiops/sockshop-demo/blob/release_version_2.1.0/load-test/locustfile.py#L14"
+    elif "in choice" in str(template):
+        return "https://github.com/aiops/sockshop-demo/blob/release_version_2.1.0/load-test/locustfile.py#L14"
+    elif "exited: stopped" in str(template):
+        return "https://github.com/aiops/sockshop-demo/blob/release_version_2.1.0/load-test/locustfile.py#L14"
+    elif "Received payment response" in str(template):
+        return "https://github.com/aiops/sockshop-demo/pull/20/files#diff-d85b981bd02613bc06ceaebfbcc2e1b6996208e2e17cf3adeb1db7d7ae1f6032L91"
     else:
         return ""
+
+
+def get_payment_risk(template, risk):
+    if "Received payment response" in str(template):
+        return 50
+    else:
+        return risk
