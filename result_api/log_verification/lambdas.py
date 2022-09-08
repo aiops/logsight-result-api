@@ -67,5 +67,7 @@ def get_code_link(template):
 def get_payment_risk(template, risk):
     if "Received payment response" in str(template):
         return 50
+    elif "Sending payment authorization response" in str(template):
+        return 50
     else:
         return risk
