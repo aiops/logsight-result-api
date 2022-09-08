@@ -45,7 +45,7 @@ def get_change_perc(baseline, target):
 
 def get_code_link(template):
     if "Unable to parse authorisation packet" in str(template):
-        return "https://github.com/aiops/sockshop-demo/pull/53/files#diff-d85b981bd02613bc06ceaebfbcc2e1b6996208e2e17cf3adeb1db7d7ae1f6032R92"
+        return "https://github.com/aiops/sockshop-demo/pull/56/files#diff-d85b981bd02613bc06ceaebfbcc2e1b6996208e2e17cf3adeb1db7d7ae1f6032R92"
     elif "category_item = choice(catalogue)" in str(template):
         return "https://github.com/aiops/sockshop-demo/blob/release_version_2.1.0/load-test/locustfile.py#L14"
     elif "self.execute_next_task()" in str(template):
@@ -59,9 +59,9 @@ def get_code_link(template):
     elif "exited: stopped" in str(template):
         return "https://github.com/aiops/sockshop-demo/blob/release_version_2.1.0/load-test/locustfile.py#L14"
     elif "Received payment response" in str(template):
-        return "https://github.com/aiops/sockshop-demo/pull/53/files#diff-d85b981bd02613bc06ceaebfbcc2e1b6996208e2e17cf3adeb1db7d7ae1f6032R91"
+        return "https://github.com/aiops/sockshop-demo/pull/56/files#diff-d85b981bd02613bc06ceaebfbcc2e1b6996208e2e17cf3adeb1db7d7ae1f6032R91"
     elif "Sending payment authorization response" in str(template):
-        return "https://github.com/aiops/sockshop-demo/pull/53/files#diff-e5910214f12c159b0116375480dd90e8455229197a99d52b4c22093f8509ee2bL60"
+        return "https://github.com/aiops/sockshop-demo/pull/56/files#diff-e5910214f12c159b0116375480dd90e8455229197a99d52b4c22093f8509ee2bR74"
     else:
         return ""
 
