@@ -8,7 +8,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from responses.responses import ErrorResponse
-from result_api.dto import VerificationDTO, AutologDTO
+from result_api.dto import VerificationDTO, LogWriterDTO
 from result_api.log_verification.verification import LogVerification, NotFoundException
 from logsight.services.service_provider import ServiceProvider
 from logsight.logger.configuration import LogConfig
@@ -34,8 +34,8 @@ def get_tasks(request: VerificationDTO):
     return JSONResponse(content=json_compatible_item_data)
 
 
-@app.post('/api/v1/autolog')
-def get_recommendations(request: AutologDTO):
+@app.post('/api/v1/writer')
+def get_recommendations(request: LogWriterDTO):
     settings = logcheck.Settings
     settings.path = Path("")
     settings.language = request.language

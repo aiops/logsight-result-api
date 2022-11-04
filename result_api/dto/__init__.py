@@ -1,2 +1,2 @@
 from .verification_dto import VerificationDTO
-from .autolog_dto import AutologDTO
+from .log_writer_dto import LogWriterDTO
