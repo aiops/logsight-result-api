@@ -6,6 +6,11 @@ FROM python:3.8
 ARG GITHUB_TOKEN
 ARG LOGSIGHT_LIB_VERSION
 
+ENV GITHUB_TOKEN="GIT_TOKEN"
+ENV LOGSIGHT_LIB_VERSION="v1.3.0"
+ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
+
+RUN echo $GITHUB_TOKEN
 RUN apt-get update && \
     apt-get -y install --no-install-recommends git-lfs && \
     rm -r /var/lib/apt/lists/*
@@ -22,6 +27,7 @@ RUN pip install -r requirements.txt
 
 RUN pip install "git+https://$GITHUB_TOKEN@github.com/aiops/logsight.git@$LOGSIGHT_LIB_VERSION"
 
+RUN pip install "git+https://$GITHUB_TOKEN@github.com/ncktl/logcheck.git@pip"
 
 # copy code
 COPY result_api/ result_api

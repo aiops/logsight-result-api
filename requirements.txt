@@ -20,4 +20,11 @@ gitpython~=3.1.27
 pytest-cov~=3.0.0
 fastapi~=0.79.0
 hypercorn~=0.13.2
-
+tqdm~=4.64.0
+tree_sitter==0.20.0
+pydantic~=1.9.2
+config~=0.5.1
+scikit-learn~=1.1.1
+setuptools~=65.0.2
+transformers[torch]
+sentencepiece
