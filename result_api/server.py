@@ -42,7 +42,8 @@ def get_recommendations(request: LogWriterDTO):
     settings.output = Path("")
     settings.debug = False
     settings.zhenhao = False
-    settings.alt = False
+    settings.alt = True
+    settings.probability = 0.95
     try:
         result = log_recommendation(request.code, settings)
     except NotFoundException as e:
